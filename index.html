@@ -50,31 +50,151 @@
       85% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-10px); }
     }
+
+    /* Smooth Cute White Cat Animation Styles */
+    @keyframes catLegSwingA {
+      0% { transform: rotate(-18deg); }
+      50% { transform: rotate(18deg); }
+      100% { transform: rotate(-18deg); }
+    }
+    @keyframes catLegSwingB {
+      0% { transform: rotate(18deg); }
+      50% { transform: rotate(-18deg); }
+      100% { transform: rotate(18deg); }
+    }
+    @keyframes catBodyWalkBob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-1.5px); }
+    }
+    @keyframes catTailWag {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-12deg); }
+    }
+    @keyframes catJumpHop {
+      0% { transform: translateY(0); }
+      40% { transform: translateY(-22px) scaleY(1.05); }
+      75% { transform: translateY(-3px) scaleY(0.96); }
+      100% { transform: translateY(0); }
+    }
+
+    #catLegBackLeft, #catLegFrontRight {
+      transform-origin: 15px 19px;
+    }
+    #catLegBackRight, #catLegFrontLeft {
+      transform-origin: 13.5px 19px;
+    }
+    #catLegFrontRight {
+      transform-origin: 31px 19px;
+    }
+    #catLegFrontLeft {
+      transform-origin: 29.5px 19px;
+    }
+
+    .cat-walking .cat-leg-swing-A {
+      animation: catLegSwingA 0.36s infinite ease-in-out;
+    }
+    .cat-walking .cat-leg-swing-B {
+      animation: catLegSwingB 0.36s infinite ease-in-out;
+    }
+    .cat-walking #catBodyGroup {
+      animation: catBodyWalkBob 0.36s infinite ease-in-out;
+    }
+    .cat-walking #catTail {
+      transform-origin: 13px 18px;
+      animation: catTailWag 0.72s infinite ease-in-out;
+    }
+
+    .cat-jumping #catSvg {
+      animation: catJumpHop 0.48s ease-out !important;
+    }
+
+    /* Super Jump Animation (Full-Page Jump) */
+    @keyframes catSuperJump {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+      }
+      10% {
+        transform: translateY(-20px) scale(0.85, 1.25);
+      }
+      45% {
+        transform: translateY(-80vh) scale(2.2) rotate(-360deg);
+      }
+      55% {
+        transform: translateY(-82vh) scale(2.2) rotate(-360deg);
+      }
+      88% {
+        transform: translateY(0) scale(1.35, 0.65) rotate(-720deg);
+      }
+      94% {
+        transform: translateY(-12px) scale(0.9, 1.1) rotate(-720deg);
+      }
+      100% {
+        transform: translateY(0) scale(1) rotate(-720deg);
+      }
+    }
+
+    .cat-super-jumping {
+      z-index: 9999 !important;
+      position: relative !important;
+    }
+    .cat-super-jumping #catSvg {
+      animation: catSuperJump 1.6s cubic-bezier(0.22, 1, 0.36, 1) !important;
+      filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.85)) drop-shadow(0 15px 35px rgba(0,0,0,0.8));
+    }
+
+    /* Sleeping Cat Styles */
+    @keyframes catZzzFloat {
+      0% { opacity: 0.2; transform: translateY(1px) scale(0.85); }
+      50% { opacity: 1; transform: translateY(-4px) scale(1.05); }
+      100% { opacity: 0.2; transform: translateY(-8px) scale(0.9); }
+    }
+    .cat-sleeping {
+      cursor: not-allowed !important;
+    }
+    .cat-sleeping #catStandingPose {
+      display: none !important;
+    }
+    .cat-sleeping #catSleepingPose {
+      display: block !important;
+    }
+    .cat-sleeping #catZzz {
+      display: flex !important;
+    }
+    .cat-zzz-anim {
+      animation: catZzzFloat 2s infinite ease-in-out;
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500 selection:text-slate-950 pb-16">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500 selection:text-slate-950 pb-0 flex flex-col justify-between overflow-x-hidden">
 
   <!-- Main Container -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
 
     <!-- Top Navigation / Header -->
-    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 mb-8 border-b border-slate-800/80 gap-4">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/20 font-black text-lg">
-          ⏱️
-        </div>
-        <div>
-          <h1 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+    <header class="flex flex-row items-center justify-between pb-6 mb-8 border-b border-slate-800/80 gap-4">
+      <!-- Title & Avatar -->
+      <div class="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+        <a href="https://t.me/zapisistrimov5opki" target="_blank" rel="noopener noreferrer" class="block shrink-0 w-11 h-11 sm:w-12 sm:h-12 transition-transform hover:scale-105" title="Перейти в Telegram-канал Записи Стримов Пятёрки">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTckFGMBEsGvlQJS5z7du3AS3C-OXfZm2k-FVk_4bWLEHSq16-YxobQSHIc&s=10" alt="Пятёрка" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover border border-amber-500/40 shadow-lg shadow-amber-500/20 cursor-pointer block" referrerPolicy="no-referrer" />
+        </a>
+        <div class="min-w-0 flex-1">
+          <h1 class="text-lg sm:text-2xl font-extrabold text-slate-100 leading-tight">
             Записи Стримов Пятёрки / Генератор Таймкодов
           </h1>
-          <p class="text-xs text-slate-400">Автоматическое форматирование ссылок для YouTube, Twitch, Kick, VK Video, VK Live</p>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">Автоматическое форматирование ссылок для YouTube, Twitch, Kick, VK Video, VK Live</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
-        <button id="clearBtn" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-red-950/40 border border-slate-800 hover:border-red-800/50 text-slate-400 hover:text-red-300 transition-all cursor-pointer">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          <span>Очистить всё</span>
+      <!-- Action Buttons: Vertical icon column on mobile, Horizontal (left to right) larger icon buttons on desktop -->
+      <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 shrink-0">
+        <button id="settingsBtn" onclick="openSettingsModal()" class="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 transition-all cursor-pointer shadow-sm group" title="Настройки">
+          <i data-lucide="settings" class="w-5 h-5 group-hover:rotate-45 transition-transform duration-300"></i>
+        </button>
+        <button id="importBtn" onclick="openImportModal()" class="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:border-amber-500/50 transition-all cursor-pointer shadow-sm" title="Импортировать текст">
+          <i data-lucide="file-input" class="w-5 h-5"></i>
+        </button>
+        <button id="clearBtn" class="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl bg-slate-900 hover:bg-red-950/40 border border-slate-800 hover:border-red-800/50 text-slate-400 hover:text-red-300 transition-all cursor-pointer shadow-sm" title="Очистить всё">
+          <i data-lucide="trash-2" class="w-5 h-5"></i>
         </button>
       </div>
     </header>
@@ -93,6 +213,10 @@
               <span>Основной стрим</span>
             </h2>
             <div class="flex items-center space-x-1.5 flex-wrap gap-1">
+              <button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка рассказывает истории 00:00'">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>Начало</span>
+              </button>
               <button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить момент">
                 <i data-lucide="plus" class="w-3 h-3"></i>
                 <span>Момент</span>
@@ -106,22 +230,40 @@
 
           <!-- Main Stream Meta Inputs -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-950/40 p-3.5 rounded-xl border border-slate-800/60">
+            <!-- 1. Video Link Input -->
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Дата записи</label>
-              <input type="text" id="streamDate" placeholder="10 июл. 2026" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+              <div class="flex items-center justify-between h-5 mb-1">
+                <label class="block text-xs font-medium text-slate-400">Ссылка</label>
+                <div id="platformBadge" class="flex items-center"></div>
+              </div>
+              <input type="text" id="videoId" placeholder="https://youtu.be/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
             </div>
 
+            <!-- 2. Block Title Input -->
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Заголовок блока</label>
+              <div class="flex items-center justify-between h-5 mb-1">
+                <label class="block text-xs font-medium text-slate-400">Заголовок блока</label>
+              </div>
               <input type="text" id="mainTitle" value="Основной" placeholder="Основной" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
             </div>
 
+            <!-- 3. Stream Date Field with Quick Actions & Video Date Fetcher -->
             <div>
-              <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-medium text-slate-400">Ссылка</label>
-                <div id="platformBadge"></div>
+              <div class="flex items-center justify-between h-5 mb-1">
+                <label class="block text-xs font-medium text-slate-400">Дата записи</label>
               </div>
-              <input type="text" id="videoId" placeholder="https://youtu.be/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+
+              <div class="flex items-center space-x-1.5">
+                <div class="relative flex-1">
+                  <input type="text" id="streamDate" placeholder="10 июл. 2026" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-8 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+                  <input type="date" id="streamDatePicker" onchange="handleDatePickerChange(this.value)" class="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 w-6 h-6 cursor-pointer z-10" title="Выбрать в календаре">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                </div>
+                <button type="button" id="fetchDateBtn" onclick="fetchVideoInfoAndApplyDate(state.videoId)" class="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0" title="Подтянуть дату публикации из ссылки на видео">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                  <span>Из видео</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -170,10 +312,16 @@
               <span>Текст описания</span>
             </h2>
 
-            <button id="copyBtn" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/10 cursor-pointer">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-              <span id="copyBtnText">Скопировать</span>
-            </button>
+            <div class="flex items-center space-x-2">
+              <button id="cardImportBtn" onclick="openImportModal()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all cursor-pointer" title="Импортировать текст в форму">
+                <i data-lucide="file-input" class="w-3.5 h-3.5"></i>
+                <span>Импорт</span>
+              </button>
+              <button id="copyBtn" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/10 cursor-pointer">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="copyBtnText">Скопировать</span>
+              </button>
+            </div>
           </div>
 
           <div class="space-y-3">
@@ -195,12 +343,233 @@
 
   </div>
 
+  <!-- Footer Track for White Pixel Cat at Very Bottom of Page -->
+  <footer class="w-full mt-16 border-t border-slate-900/60 relative overflow-visible select-none bg-slate-950/90 pt-4 pb-0 z-30">
+    <div id="catTrack" class="relative w-full max-w-7xl mx-auto px-4 h-11 flex items-end overflow-visible">
+      <div id="walkingCat" class="absolute bottom-0 left-0 cursor-pointer cat-walking" style="width: 52px; height: 42px; touch-action: none;" title="Милый белый котик 🐾">
+        <!-- Sleeping Zzz animation badge -->
+        <div id="catZzz" class="hidden absolute -top-1 right-2 items-center space-x-0.5 text-xs font-black text-amber-300 pointer-events-none select-none tracking-widest cat-zzz-anim">
+          <div id="catZzzInner" class="flex items-center space-x-0.5">
+            <span>Z</span><span class="text-[10px]">z</span><span class="text-[8px]">z</span><span>...</span><span class="text-xs">😴</span>
+          </div>
+        </div>
+        <svg id="catSvg" viewBox="0 0 52 36" class="w-full h-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+          <!-- Standing / Walking Pose -->
+          <g id="catStandingPose">
+            <!-- Tail -->
+            <g id="catTail">
+              <path d="M 12 19 C 8 15 5 9 8 5 C 10 3 12 6 10 10 C 9 12 12 16 14 18 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+
+            <!-- Back Legs -->
+            <g id="catLegBackRight" class="cat-leg-swing-B">
+              <path d="M 12 18 C 12 18 11 25 10 29 C 10 31 14 31 14 29 C 14 25 15 18 15 18 Z" fill="#cbd5e1" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+            <g id="catLegFrontLeft" class="cat-leg-swing-B">
+              <path d="M 28 18 C 28 18 27 25 26 29 C 26 31 30 31 30 29 C 30 25 31 18 31 18 Z" fill="#cbd5e1" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+
+            <!-- Main Body & Head Group -->
+            <g id="catBodyGroup">
+              <!-- Smooth Seamless Body & Head Silhouette -->
+              <path d="M 12 19 C 9 16 10 11 14 10 C 19 9 26 10 30 11 C 32 8 34 5 35 4 C 36.5 2.5 38 2.5 38.5 6 C 39.5 7 41.5 7 42.5 6 C 43 2.5 44.5 2.5 46 4 C 47 5 48.5 9 47 13 C 46 16 43 18 39 19 C 35 20 29 21 24 21 C 18 21 14 21 12 19 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              
+              <!-- Pink Inner Ears -->
+              <path d="M 35.5 5.5 C 36.5 4 37.5 4 37.5 6.5 Z" fill="#ff8ba7" />
+              <path d="M 43.5 5.5 C 44.5 4 45.5 4 45.5 6.5 Z" fill="#ff8ba7" />
+
+              <!-- Cute Eyes with Highlight -->
+              <ellipse cx="38.5" cy="11.5" rx="1.3" ry="2" fill="#1e293b" />
+              <circle cx="38.1" cy="10.7" r="0.6" fill="#ffffff" />
+
+              <ellipse cx="44" cy="11.5" rx="1.3" ry="2" fill="#1e293b" />
+              <circle cx="43.6" cy="10.7" r="0.6" fill="#ffffff" />
+
+              <!-- Pink Nose & Mouth -->
+              <ellipse cx="41.3" cy="13.5" rx="1" ry="0.7" fill="#ff4d71" />
+              <path d="M 40.3 14.5 Q 41.3 15.3 42.3 14.5" fill="none" stroke="#1e293b" stroke-width="1" stroke-linecap="round" />
+
+              <!-- Blushing Cheeks -->
+              <ellipse cx="36.5" cy="14" rx="1.6" ry="0.9" fill="#ffb3c1" opacity="0.8" />
+              <ellipse cx="46" cy="14" rx="1.6" ry="0.9" fill="#ffb3c1" opacity="0.8" />
+
+              <!-- Whiskers -->
+              <line x1="33" y1="13" x2="30" y2="12" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" />
+              <line x1="33" y1="14.5" x2="30" y2="14.5" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" />
+              <line x1="47" y1="13" x2="50" y2="12" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" />
+              <line x1="47" y1="14.5" x2="50" y2="14.5" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" />
+            </g>
+
+            <!-- Front Legs -->
+            <g id="catLegBackLeft" class="cat-leg-swing-A">
+              <path d="M 14 18 C 14 18 13 25 12 29 C 12 31 16 31 16 29 C 16 25 17 18 17 18 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+            <g id="catLegFrontRight" class="cat-leg-swing-A">
+              <path d="M 30 18 C 30 18 29 25 28 29 C 28 31 32 31 32 29 C 32 25 33 18 33 18 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+          </g>
+
+          <!-- Dedicated Sleeping Loaf Pose -->
+          <g id="catSleepingPose" class="hidden">
+            <!-- Tail wrapped around body -->
+            <path d="M 12 28 C 7 28 4 23 7 19 C 9 17 12 19 11 22 C 10 24 13 27 16 28 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- Main Sleeping Body & Head Silhouette -->
+            <path d="M 12 28 C 10 22 14 17 22 17 C 28 17 33 18 37 19 C 39 16 41 14 42 13 C 43 12 44.5 12 45 15 C 46 16 47.5 16 48.5 15 C 49 12 50.5 12 51 14 C 52 16 52.5 20 50 24 C 48 27 44 29 39 30 C 33 31 25 31 18 31 C 14 31 12 30 12 28 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- Pink Inner Ears -->
+            <path d="M 42.5 13.5 C 43.5 12.5 44 12.5 44 14 Z" fill="#ff8ba7" />
+            <path d="M 49.5 13.5 C 50.5 12.5 50.8 12.5 50.8 14 Z" fill="#ff8ba7" />
+
+            <!-- Closed Sleeping Eyes (Happy Arcs) -->
+            <path d="M 42 20 Q 43.5 18 45 20" fill="none" stroke="#1e293b" stroke-width="1.3" stroke-linecap="round" />
+            <path d="M 47 20 Q 48.5 18 50 20" fill="none" stroke="#1e293b" stroke-width="1.3" stroke-linecap="round" />
+
+            <!-- Pink Nose -->
+            <ellipse cx="46.2" cy="22" rx="0.9" ry="0.6" fill="#ff4d71" />
+
+            <!-- Blushing Cheeks -->
+            <ellipse cx="41" cy="22.5" rx="1.4" ry="0.8" fill="#ffb3c1" opacity="0.8" />
+            <ellipse cx="50" cy="22.5" rx="1.4" ry="0.8" fill="#ffb3c1" opacity="0.8" />
+
+            <!-- Whiskers -->
+            <line x1="39" y1="22" x2="36" y2="21" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" />
+            <line x1="39" y1="23.5" x2="36" y2="23.5" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" />
+
+            <!-- Tucked Little Paws -->
+            <path d="M 24 30 C 24 28 28 28 28 30 Z" fill="#cbd5e1" stroke="#1e293b" stroke-width="1" />
+            <path d="M 32 30 C 32 28 36 28 36 30 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Import Text Modal -->
+  <div id="importModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-200" onclick="handleImportModalBackdropClick(event)">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-200" id="importModalBox">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/40">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold">
+            <i data-lucide="file-input" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-100">Импорт готового текста / таймкодов</h3>
+            <p class="text-[11px] text-slate-400">Вставьте готовое описание или список таймкодов для автозаполнения</p>
+          </div>
+        </div>
+        <button onclick="closeImportModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer" title="Закрыть (Esc)">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-6 space-y-4">
+        <!-- Quick Action / Example Preset Buttons -->
+        <div class="flex items-center justify-between flex-wrap gap-2 text-xs">
+          <span class="text-slate-400 font-medium">Быстрые действия:</span>
+          <div class="flex items-center space-x-2 flex-wrap gap-1">
+            <button onclick="loadImportExample('full')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer">
+              Пример (Запись со ссылками)
+            </button>
+            <button onclick="loadImportExample('simple')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer">
+              Пример (Простой список)
+            </button>
+            <button onclick="pasteImportFromClipboard()" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg text-[11px] font-bold transition-colors cursor-pointer flex items-center space-x-1">
+              <i data-lucide="clipboard" class="w-3 h-3"></i>
+              <span>Вставить из буфера</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Textarea -->
+        <div class="relative">
+          <textarea id="importInputText" rows="10" placeholder="Вставьте сюда готовый текст описания, например:&#10;&#10;Запись за 10 июл. 2026&#10;Основной:&#10;1) Название момента (01:23:45)&#10;https://youtu.be/...&#10;- Подмомент (01:25:00)&#10;&#10;Дневной:&#10;1) Доп. момент (00:15:30)&#10;&#10;#FreakLand #стрим #моменты" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 leading-relaxed resize-y"></textarea>
+        </div>
+
+        <!-- Import Mode Selection -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 flex-wrap gap-2">
+          <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300 select-none">
+            <input type="radio" name="importMode" value="replace" checked class="w-4 h-4 text-amber-500 bg-slate-950 border-slate-800 focus:ring-amber-500 accent-amber-500">
+            <span>Очистить и заменить текущую запись</span>
+          </label>
+          <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300 select-none">
+            <input type="radio" name="importMode" value="append" class="w-4 h-4 text-amber-500 bg-slate-950 border-slate-800 focus:ring-amber-500 accent-amber-500">
+            <span>Добавить к существующим моментам</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-slate-800 bg-slate-950/60">
+        <button onclick="closeImportModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer">
+          Отмена
+        </button>
+        <button onclick="runImportProcess()" class="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/20 cursor-pointer">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Распознать и импортировать</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200" onclick="handleSettingsModalBackdropClick(event)">
+    <div id="settingsModalBox" class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden transform scale-95 transition-all duration-200 flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-100">Настройки приложения</h3>
+            <p class="text-[10px] text-slate-400">Параметры импорта и автоматизации</p>
+          </div>
+        </div>
+        <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer" title="Закрыть (Esc)">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-6 space-y-4">
+        <!-- Setting Item: Auto import date toggle -->
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
+          <div class="space-y-1">
+            <label for="autoImportDateToggle" class="text-xs font-semibold text-slate-200 block cursor-pointer">
+              Автоматически импортировать дату записи из видео
+            </label>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              При вставке ссылки на видео автоматически подтягивать дату публикации в поле «Дата записи»
+            </p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" id="autoImportDateToggle" class="sr-only peer" onchange="toggleAutoImportDate(this.checked)">
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-end px-6 py-4 border-t border-slate-800 bg-slate-950/60">
+        <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/20 cursor-pointer">
+          Готово
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 pointer-events-none"></div>
 
   <!-- Vanilla JS Logic -->
   <script>
     // --- Initial Clean State ---
+    const savedAutoImport = localStorage.getItem('autoImportDate');
+    const autoImportDateVal = savedAutoImport === null ? true : (savedAutoImport === 'true');
+
     let state = {
       streamDate: '',
       mainTitle: 'Основной',
@@ -210,7 +579,8 @@
       extraStreams: [],
       activePlayerStreamId: 'all',
       activeSeekTimes: {},
-      playerViewMode: 'phone'
+      playerViewMode: 'phone',
+      autoImportDate: autoImportDateVal
     };
 
     // --- Utilities ---
@@ -1277,6 +1647,103 @@
       lucide.createIcons();
     }
 
+    // --- Date & Title Preset Helpers ---
+
+    function setQuickDate(type) {
+      const d = new Date();
+      if (type === 'yesterday') {
+        d.setDate(d.getDate() - 1);
+      }
+      const mShortRu = ['янв.', 'фев.', 'мар.', 'апр.', 'мая', 'июн.', 'июл.', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+      const day = d.getDate();
+      const monthStr = mShortRu[d.getMonth()];
+      const year = d.getFullYear();
+      const dateStr = `${day} ${monthStr} ${year}`;
+
+      state.streamDate = dateStr;
+      const el = document.getElementById('streamDate');
+      if (el) el.value = dateStr;
+
+      const isoMonth = String(d.getMonth() + 1).padStart(2, '0');
+      const isoDay = String(d.getDate()).padStart(2, '0');
+      const datePicker = document.getElementById('streamDatePicker');
+      if (datePicker) datePicker.value = `${year}-${isoMonth}-${isoDay}`;
+
+      updateOutput();
+      showToast(`Дата установлена: ${dateStr}`);
+    }
+
+    function handleDatePickerChange(isoVal) {
+      if (!isoVal) return;
+      const parts = isoVal.split('-');
+      if (parts.length === 3) {
+        const year = parts[0];
+        const monthIdx = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        const mShortRu = ['янв.', 'фев.', 'мар.', 'апр.', 'мая', 'июн.', 'июл.', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+        const dateStr = `${day} ${mShortRu[monthIdx]} ${year}`;
+
+        state.streamDate = dateStr;
+        const el = document.getElementById('streamDate');
+        if (el) el.value = dateStr;
+        updateOutput();
+        showToast(`Дата выбрана: ${dateStr}`);
+      }
+    }
+
+    function applyMainTitlePreset(val) {
+      if (!val) return;
+      state.mainTitle = val;
+      const el = document.getElementById('mainTitle');
+      if (el) el.value = val;
+      updateOutput();
+    }
+
+    async function fetchVideoInfoAndApplyDate(url, isAuto = false) {
+      if (!url || !url.trim()) {
+        if (!isAuto) showToast('Укажите ссылку на видео');
+        return;
+      }
+
+      const btn = document.getElementById('fetchDateBtn');
+      const statusEl = document.getElementById('fetchDateStatus');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Ищем...</span>`;
+        lucide.createIcons();
+      }
+
+      try {
+        const res = await fetch(`/api/video-info?url=${encodeURIComponent(url.trim())}`);
+        const data = await res.json();
+
+        if (data && data.success && (data.dateFormattedShort || data.dateFormatted)) {
+          const chosenDate = data.dateFormattedShort || data.dateFormatted;
+          state.streamDate = chosenDate;
+          const dateInput = document.getElementById('streamDate');
+          if (dateInput) dateInput.value = chosenDate;
+
+          if (data.dateIso) {
+            const picker = document.getElementById('streamDatePicker');
+            if (picker) picker.value = data.dateIso;
+          }
+
+          updateOutput();
+          showToast(`Дата из видео подтянута: ${chosenDate}`);
+        } else {
+          if (!isAuto) showToast('Не удалось извлечь дату из видео');
+        }
+      } catch (err) {
+        if (!isAuto) showToast('Ошибка при загрузке информации о видео');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i data-lucide="calendar" class="w-3.5 h-3.5"></i><span>Из видео</span>`;
+          lucide.createIcons();
+        }
+      }
+    }
+
     // --- Main Moments Renders & Logic ---
 
     function renderMainMoments() {
@@ -1286,7 +1753,7 @@
           <div class="text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950/20">
             <p class="text-xs text-slate-500 mb-3">Основной список моментов пуст</p>
             <div class="flex items-center justify-center space-x-2 flex-wrap gap-2">
-              <button onclick="addMainMoment('Пятёрка рассказывает истории')" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
+              <button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Добавить начало стрима</span>
               </button>
@@ -1354,6 +1821,10 @@
       // Bottom quick action bar when items exist
       html += `
         <div class="pt-2 flex items-center space-x-2 flex-wrap gap-2">
+          <button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Начало</span>
+          </button>
           <button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
             <span>Момент</span>
@@ -1370,11 +1841,11 @@
       updateOutput();
     }
 
-    function addMainMoment(initialTitle = '') {
+    function addMainMoment(initialTitle = '', initialTime = '') {
       state.mainMoments.push({
         id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
         title: initialTitle,
-        time: '',
+        time: initialTime,
         videoUrlOverride: '',
         subMoments: []
       });
@@ -1517,10 +1988,20 @@
               ${momentsHtml || `<p class="text-xs text-slate-600 italic">Нет моментов</p>`}
             </div>
 
-            <button onclick="addExtraMoment('${stream.id}')" class="text-xs text-purple-300 hover:text-purple-200 flex items-center space-x-1 pt-1 cursor-pointer font-semibold">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Добавить момент в этот стрим</span>
-            </button>
+            <div class="flex items-center space-x-1.5 flex-wrap gap-1.5 pt-1">
+              <button onclick="addExtraMoment('${stream.id}', 'Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка рассказывает истории 00:00'">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>Начало</span>
+              </button>
+              <button onclick="addExtraMoment('${stream.id}', '')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить момент">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>Момент</span>
+              </button>
+              <button onclick="addExtraMoment('${stream.id}', 'Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка смотрит &quot;&quot;'">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>Реакция</span>
+              </button>
+            </div>
           </div>
         `;
       });
@@ -1553,10 +2034,10 @@
       renderExtraStreams();
     }
 
-    function addExtraMoment(streamId) {
+    function addExtraMoment(streamId, initialTitle = '', initialTime = '') {
       const st = state.extraStreams.find(s => s.id === streamId);
       if (st) {
-        st.moments.push({ id: 'em_' + Date.now(), title: '', time: '', videoUrlOverride: '', subMoments: [] });
+        st.moments.push({ id: 'em_' + Date.now() + Math.random().toString(36).substr(2, 4), title: initialTitle, time: initialTime, videoUrlOverride: '', subMoments: [] });
         renderExtraStreams();
       }
     }
@@ -1617,6 +2098,390 @@
       }
     }
 
+    // --- Settings Engine ---
+
+    function openSettingsModal() {
+      const modal = document.getElementById('settingsModal');
+      const box = document.getElementById('settingsModalBox');
+      if (!modal || !box) return;
+
+      const toggle = document.getElementById('autoImportDateToggle');
+      if (toggle) toggle.checked = !!state.autoImportDate;
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      box.classList.remove('scale-95');
+      box.classList.add('scale-100');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeSettingsModal() {
+      const modal = document.getElementById('settingsModal');
+      const box = document.getElementById('settingsModalBox');
+      if (!modal || !box) return;
+
+      box.classList.remove('scale-100');
+      box.classList.add('scale-95');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function handleSettingsModalBackdropClick(e) {
+      if (e.target.id === 'settingsModal') {
+        closeSettingsModal();
+      }
+    }
+
+    function toggleAutoImportDate(checked) {
+      state.autoImportDate = checked;
+      localStorage.setItem('autoImportDate', checked);
+      showToast(checked ? 'Автоимпорт даты включён' : 'Автоимпорт даты выключен');
+    }
+
+    // --- Text Import Engine ---
+
+    function openImportModal() {
+      const modal = document.getElementById('importModal');
+      const box = document.getElementById('importModalBox');
+      if (!modal || !box) return;
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      box.classList.remove('scale-95');
+      box.classList.add('scale-100');
+
+      const textarea = document.getElementById('importInputText');
+      if (textarea) setTimeout(() => textarea.focus(), 100);
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeImportModal() {
+      const modal = document.getElementById('importModal');
+      const box = document.getElementById('importModalBox');
+      if (!modal || !box) return;
+
+      box.classList.remove('scale-100');
+      box.classList.add('scale-95');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function handleImportModalBackdropClick(e) {
+      if (e.target.id === 'importModal') {
+        closeImportModal();
+      }
+    }
+
+    async function pasteImportFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          document.getElementById('importInputText').value = text;
+          showToast('Текст вставлен из буфера!');
+        } else {
+          showToast('Буфер обмена пуст');
+        }
+      } catch (err) {
+        showToast('Вставьте текст с помощью Ctrl+V');
+      }
+    }
+
+    function loadImportExample(type) {
+      const textarea = document.getElementById('importInputText');
+      if (!textarea) return;
+
+      if (type === 'full') {
+        textarea.value = `Запись за 10 июл. 2026
+
+Интересные моменты стрима:
+Основной:
+1) Пятёрка смотрит мемы (10:15)
+https://youtu.be/dQw4w9WgXcQ?t=10m15s
+- Смешной котик (12:00)
+https://youtu.be/dQw4w9WgXcQ?t=12m0s
+2) Реагирует на новости (01:20:30)
+https://youtu.be/dQw4w9WgXcQ?t=1h20m30s
+
+Дневной:
+1) Игра в Майнкрафт (00:15:30)
+https://youtu.be/jNQXAC9IVRw?t=15m30s
+
+#FreakLand #стрим #моменты`;
+      } else {
+        textarea.value = `00:00 Вступление
+05:30 Пятёрка смотрит мемы
+12:45 Реагирует на новость
+1:05:20 Игра в Майнкрафт
+2:15:00 Завершение стрима`;
+      }
+    }
+
+    function extractTimeFromUrlString(urlStr) {
+      if (!urlStr) return null;
+      const match = urlStr.match(/[?&](?:t|tc|time|start)=([0-9hms]+)/i);
+      if (!match) return null;
+      const tStr = match[1];
+      let total = 0;
+      const hMatch = tStr.match(/(\d+)h/i);
+      const mMatch = tStr.match(/(\d+)m/i);
+      const sMatch = tStr.match(/(\d+)s/i);
+      if (hMatch) total += parseInt(hMatch[1], 10) * 3600;
+      if (mMatch) total += parseInt(mMatch[1], 10) * 60;
+      if (sMatch) total += parseInt(sMatch[1], 10);
+      if (!hMatch && !mMatch && !sMatch && /^\d+$/.test(tStr)) {
+        total = parseInt(tStr, 10);
+      }
+      return total > 0 ? formatSecondsToHHMMSS(total) : null;
+    }
+
+    function cleanBaseVideoUrl(urlStr) {
+      if (!urlStr) return '';
+      return urlStr.replace(/([?&])(t|tc|time|start)=[^&]*/gi, '').replace(/[?&]$/, '').replace(/\?&/, '?');
+    }
+
+    function parseTimeAndTitle(rawLine) {
+      let line = rawLine.trim();
+
+      // Strip leading list numbers like 1), 1., 1 -, etc.
+      line = line.replace(/^\d+[\.\)\s\-]+\s*/, '');
+
+      let time = '';
+      let title = line;
+
+      // Pattern 1: Title (01:23:45) or Title (12:34) or Title (1:23:45)
+      const parenMatch = line.match(/^(.*?)\s*\((?:(\d{1,2}:\d{2}:\d{2})|(\d{1,2}:\d{2}))\)$/);
+      if (parenMatch) {
+        title = parenMatch[1].trim();
+        time = parenMatch[2] || parenMatch[3];
+        return { title, time };
+      }
+
+      // Pattern 2: 01:23:45 - Title or 12:34 Title or 01:23:45 Title or 12:34:56 Title
+      const prefixMatch = line.match(/^(?:(\d{1,2}:\d{2}:\d{2})|(\d{1,2}:\d{2}))[\s\-\|:]+\s*(.*)$/);
+      if (prefixMatch) {
+        time = prefixMatch[1] || prefixMatch[2];
+        title = prefixMatch[3].trim();
+        return { title, time };
+      }
+
+      // Pattern 3: Title - 01:23:45 or Title 12:34
+      const suffixMatch = line.match(/^(.*?)\s*[\s\-\|:]+\s*(?:(\d{1,2}:\d{2}:\d{2})|(\d{1,2}:\d{2}))$/);
+      if (suffixMatch) {
+        title = suffixMatch[1].trim();
+        time = suffixMatch[2] || suffixMatch[3];
+        return { title, time };
+      }
+
+      return { title: line, time: '' };
+    }
+
+    function parseImportText(rawText) {
+      if (!rawText || !rawText.trim()) return null;
+
+      const lines = rawText.split(/\r?\n/);
+
+      let streamDate = '';
+      let mainTitle = 'Основной';
+      let videoId = '';
+      let hashtags = '';
+      let mainMoments = [];
+      let extraStreams = [];
+
+      let currentTarget = 'main'; // 'main' or index in extraStreams
+      let currentMoment = null;
+
+      function getActiveMomentsList() {
+        if (currentTarget === 'main') {
+          return mainMoments;
+        } else {
+          return extraStreams[currentTarget].moments;
+        }
+      }
+
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (!line) continue;
+
+        // 1. Date line
+        if (/^(?:Запись за|Запись от|Дата:)/i.test(line)) {
+          const d = line.replace(/^(?:Запись за|Запись от|Дата:)[\s:]*/i, '').trim();
+          if (d) streamDate = d;
+          continue;
+        }
+
+        // 2. Hashtags line
+        if (/^(?:#[\wа-яА-ЯёЁ_]+\s*)+$/.test(line)) {
+          if (hashtags) hashtags += ' ' + line;
+          else hashtags = line;
+          continue;
+        }
+
+        // 3. Section header lines like "Интересные моменты стрима:" or "Таймкоды:"
+        if (/^(?:Интересные моменты|Таймкоды|Моменты стрима)/i.test(line)) {
+          continue;
+        }
+
+        // 4. Block header lines ending in ":" e.g. "Основной:", "Дневной:", "Ночной:"
+        if (/:$/.test(line) && !line.startsWith('http://') && !line.startsWith('https://')) {
+          const blockTitle = line.replace(/:$/, '').trim();
+          if (blockTitle) {
+            if (currentTarget === 'main' && mainMoments.length === 0 && (blockTitle.toLowerCase().includes('основной') || blockTitle === 'Основной')) {
+              mainTitle = blockTitle;
+              currentTarget = 'main';
+            } else if (mainMoments.length === 0 && extraStreams.length === 0) {
+              mainTitle = blockTitle;
+              currentTarget = 'main';
+            } else {
+              extraStreams.push({
+                id: 'extra_' + Date.now() + Math.random().toString(36).substr(2, 4),
+                title: blockTitle,
+                streamUrl: '',
+                moments: []
+              });
+              currentTarget = extraStreams.length - 1;
+            }
+            currentMoment = null;
+          }
+          continue;
+        }
+
+        // 5. Standalone URL line
+        if (line.startsWith('http://') || line.startsWith('https://')) {
+          const timeInUrl = extractTimeFromUrlString(line);
+          const cleanUrl = cleanBaseVideoUrl(line);
+
+          if (currentTarget === 'main') {
+            if (!videoId) {
+              videoId = cleanUrl;
+            } else if (cleanUrl !== videoId && currentMoment) {
+              currentMoment.videoUrlOverride = cleanUrl;
+            }
+          } else {
+            const ext = extraStreams[currentTarget];
+            if (ext) {
+              if (!ext.streamUrl) {
+                ext.streamUrl = cleanUrl;
+              } else if (cleanUrl !== ext.streamUrl && currentMoment) {
+                currentMoment.videoUrlOverride = cleanUrl;
+              }
+            }
+          }
+
+          if (timeInUrl && currentMoment && !currentMoment.time) {
+            currentMoment.time = timeInUrl;
+          }
+          continue;
+        }
+
+        // 6. Submoment line (starts with -, *, •, >)
+        if (/^[\-\*•>]\s+/.test(line)) {
+          const subClean = line.replace(/^[\-\*•>]\s+/, '');
+          const parsedSub = parseTimeAndTitle(subClean);
+
+          if (currentMoment) {
+            if (!currentMoment.subMoments) currentMoment.subMoments = [];
+            currentMoment.subMoments.push({
+              id: 'sub_' + Date.now() + Math.random().toString(36).substr(2, 4),
+              title: parsedSub.title,
+              time: parsedSub.time,
+              videoUrlOverride: ''
+            });
+          } else {
+            const newM = {
+              id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
+              title: parsedSub.title,
+              time: parsedSub.time,
+              videoUrlOverride: '',
+              subMoments: []
+            };
+            getActiveMomentsList().push(newM);
+            currentMoment = newM;
+          }
+          continue;
+        }
+
+        // 7. Regular moment line
+        const parsed = parseTimeAndTitle(line);
+
+        // Check if line contains inline URL
+        const urlInTitleMatch = parsed.title.match(/(https?:\/\/[^\s]+)/);
+        let overrideUrl = '';
+        if (urlInTitleMatch) {
+          overrideUrl = cleanBaseVideoUrl(urlInTitleMatch[1]);
+          const timeInEmbeddedUrl = extractTimeFromUrlString(urlInTitleMatch[1]);
+          if (timeInEmbeddedUrl && !parsed.time) {
+            parsed.time = timeInEmbeddedUrl;
+          }
+          parsed.title = parsed.title.replace(urlInTitleMatch[1], '').trim();
+        }
+
+        const newMom = {
+          id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
+          title: parsed.title,
+          time: parsed.time,
+          videoUrlOverride: overrideUrl,
+          subMoments: []
+        };
+
+        getActiveMomentsList().push(newMom);
+        currentMoment = newMom;
+      }
+
+      return {
+        streamDate,
+        mainTitle,
+        videoId,
+        hashtags,
+        mainMoments,
+        extraStreams
+      };
+    }
+
+    function runImportProcess() {
+      const textarea = document.getElementById('importInputText');
+      if (!textarea || !textarea.value.trim()) {
+        showToast('Вставьте текст для импорта');
+        return;
+      }
+
+      const result = parseImportText(textarea.value);
+      if (!result) {
+        showToast('Не удалось распознать данные');
+        return;
+      }
+
+      const mode = document.querySelector('input[name="importMode"]:checked')?.value || 'replace';
+
+      if (mode === 'replace') {
+        if (result.streamDate) state.streamDate = result.streamDate;
+        if (result.mainTitle) state.mainTitle = result.mainTitle;
+        if (result.videoId) state.videoId = result.videoId;
+        if (result.hashtags) state.hashtags = result.hashtags;
+        state.mainMoments = result.mainMoments;
+        state.extraStreams = result.extraStreams;
+      } else {
+        if (result.streamDate && !state.streamDate) state.streamDate = result.streamDate;
+        if (result.videoId && !state.videoId) state.videoId = result.videoId;
+        if (result.hashtags) {
+          state.hashtags = state.hashtags ? (state.hashtags + ' ' + result.hashtags) : result.hashtags;
+        }
+        state.mainMoments = [...state.mainMoments, ...result.mainMoments];
+        state.extraStreams = [...state.extraStreams, ...result.extraStreams];
+      }
+
+      // Update DOM input values
+      document.getElementById('streamDate').value = state.streamDate;
+      document.getElementById('mainTitle').value = state.mainTitle;
+      document.getElementById('videoId').value = state.videoId;
+      document.getElementById('hashtags').value = state.hashtags;
+
+      renderMainMoments();
+      renderExtraStreams();
+      updateBadge();
+      updateOutput();
+
+      closeImportModal();
+      showToast('Запись и моменты успешно импортированы!');
+    }
+
     // --- Init & Event Binding ---
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1632,6 +2497,7 @@
       });
 
       const videoIdEl = document.getElementById('videoId');
+      let videoDebounceTimer = null;
       const handleVideoIdChange = (e) => {
         state.videoId = e.target.value;
         if (state.activePlayerStreamId !== 'all' && state.activePlayerStreamId !== 'main') {
@@ -1639,6 +2505,14 @@
         }
         updateBadge();
         updateOutput();
+
+        // Auto pull date from video URL if present and setting enabled
+        if (state.autoImportDate && state.videoId && state.videoId.trim()) {
+          clearTimeout(videoDebounceTimer);
+          videoDebounceTimer = setTimeout(() => {
+            fetchVideoInfoAndApplyDate(state.videoId.trim(), true);
+          }, 600);
+        }
       };
       videoIdEl.addEventListener('input', handleVideoIdChange);
       videoIdEl.addEventListener('change', handleVideoIdChange);
@@ -1741,10 +2615,189 @@
         });
       }, 400);
 
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeImportModal();
+          closeSettingsModal();
+        }
+      });
+
       // Render initial clean view
       renderMainMoments();
       renderExtraStreams();
+
+      // Initialize Walking Cat
+      initWalkingCat();
     });
+
+    // --- White Pixel Walking Cat Engine ---
+    function initWalkingCat() {
+      const cat = document.getElementById('walkingCat');
+      const track = document.getElementById('catTrack');
+      if (!cat || !track) return;
+
+      const catWidth = 52;
+      let posX = Math.random() * Math.max(50, track.clientWidth - catWidth - 50);
+      let dir = 1; // 1 = right, -1 = left
+      let speed = 1.1; // pixels per frame
+      let isPaused = false;
+      let isSuperJumping = false;
+      let isSleeping = false;
+      let sleepTimeout = null;
+      let clickCount = 0;
+      let autoSecondsCount = 0;
+
+      function updateCatPosition() {
+        if (!isPaused && !isSleeping) {
+          posX += dir * speed;
+          const maxRight = Math.max(0, track.clientWidth - catWidth);
+
+          if (posX >= maxRight) {
+            posX = maxRight;
+            dir = -1;
+          } else if (posX <= 0) {
+            posX = 0;
+            dir = 1;
+          }
+        }
+
+        // Apply position and direction
+        cat.style.transform = `translateX(${posX}px) scaleX(${dir})`;
+        const zzzInner = document.getElementById('catZzzInner');
+        if (zzzInner) {
+          zzzInner.style.transform = `scaleX(${dir})`;
+        }
+        requestAnimationFrame(updateCatPosition);
+      }
+
+      function startSleeping() {
+        if (isSleeping || isSuperJumping) return;
+        isSleeping = true;
+        isPaused = true;
+        clickCount = 0;
+        cat.classList.remove('cat-walking', 'cat-jumping');
+        cat.classList.add('cat-sleeping');
+        cat.removeAttribute('title');
+
+        // Random sleep duration between 5 and 30 seconds
+        const sleepDuration = (Math.random() * 25 + 5) * 1000;
+
+        if (sleepTimeout) clearTimeout(sleepTimeout);
+        sleepTimeout = setTimeout(() => {
+          wakeUp();
+        }, sleepDuration);
+      }
+
+      function wakeUp() {
+        isSleeping = false;
+        isPaused = false;
+        cat.classList.remove('cat-sleeping');
+        cat.classList.add('cat-walking');
+        cat.setAttribute('title', 'Милый белый котик 🐾');
+        scheduleRandomBehavior();
+      }
+
+      function triggerJump() {
+        if (!cat || isSuperJumping || isSleeping) return;
+        cat.classList.add('cat-jumping');
+        setTimeout(() => {
+          cat.classList.remove('cat-jumping');
+        }, 480);
+      }
+
+      function triggerSuperJump() {
+        if (!cat || isSuperJumping || isSleeping) return;
+        isSuperJumping = true;
+        clickCount = 0;
+        autoSecondsCount = 0;
+        cat.classList.add('cat-super-jumping');
+        setTimeout(() => {
+          cat.classList.remove('cat-super-jumping');
+          isSuperJumping = false;
+        }, 1600);
+      }
+
+      // Random pauses & periodic jumps
+      function scheduleRandomBehavior() {
+        if (isSleeping) return;
+        const delay = Math.random() * 3500 + 2500;
+        setTimeout(() => {
+          if (isSleeping) return;
+
+          const rand = Math.random();
+          if (rand > 0.55) {
+            // Jump!
+            triggerJump();
+          } else if (rand > 0.3 && !isPaused) {
+            // Short pause
+            isPaused = true;
+            cat.classList.remove('cat-walking');
+            setTimeout(() => {
+              if (!isSleeping) {
+                isPaused = false;
+                cat.classList.add('cat-walking');
+              }
+              scheduleRandomBehavior();
+            }, Math.random() * 2000 + 1000);
+            return;
+          }
+          scheduleRandomBehavior();
+        }, delay);
+      }
+
+      // Ticker interval running every second:
+      // 1. 0.01 (1%) chance per second for cat to fall asleep for 5-30 sec
+      // 2. Incremental full-page super jump: starts at 0.0001 (+0.0001/sec), guaranteed on 10,000th second
+      setInterval(() => {
+        if (isSleeping || isSuperJumping) return;
+
+        if (Math.random() < 0.01) {
+          startSleeping();
+          return;
+        }
+
+        autoSecondsCount++;
+        const autoChance = autoSecondsCount * 0.0001;
+        if (Math.random() < autoChance) {
+          triggerSuperJump();
+        }
+      }, 1000);
+
+      // Click / Tap interaction:
+      // +0.0001 chance for super jump per click (guaranteed on 10,000th click)
+      // +0.01 chance for sleeping per click (guaranteed on 100th click)
+      // Disabled while sleeping or super jumping
+      cat.addEventListener('click', (e) => {
+        if (isSleeping || isSuperJumping) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+
+        clickCount++;
+        const superJumpChance = clickCount * 0.0001;
+        const sleepChance = clickCount * 0.01;
+        const rand = Math.random();
+
+        if (rand < superJumpChance) {
+          triggerSuperJump();
+        } else if (rand < superJumpChance + sleepChance) {
+          startSleeping();
+        } else {
+          triggerJump();
+        }
+      });
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        const maxRight = Math.max(0, track.clientWidth - catWidth);
+        if (posX > maxRight) posX = maxRight;
+      });
+
+      requestAnimationFrame(updateCatPosition);
+      scheduleRandomBehavior();
+    }
   </script>
 </body>
 </html>
