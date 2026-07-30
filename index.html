@@ -24,6 +24,8 @@
   </script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
   <style>
     ::-webkit-scrollbar {
       width: 8px;
@@ -85,15 +87,21 @@
 
         <!-- Main Stream & Moments Card -->
         <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800 flex-wrap gap-2">
             <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2">
               <i data-lucide="video" class="w-4 h-4 text-amber-400"></i>
               <span>Основной стрим</span>
             </h2>
-            <button onclick="addMainMoment()" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Добавить момент</span>
-            </button>
+            <div class="flex items-center space-x-1.5 flex-wrap gap-1">
+              <button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить момент">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>Момент</span>
+              </button>
+              <button onclick="addMainMoment('Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка смотрит &quot;&quot;'">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                <span>Реакция</span>
+              </button>
+            </div>
           </div>
 
           <!-- Main Stream Meta Inputs -->
@@ -148,20 +156,19 @@
 
       </div>
 
-      <!-- Right Column: Text Output & Live Preview -->
+      <!-- Right Column: Player Preview & Text Output -->
       <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-6 lg:h-fit">
 
+        <!-- Container for all Stream Players (Main + Extra Streams with links) -->
+        <div id="allPlayersContainer" class="space-y-6"></div>
+
+        <!-- Card 2: Formatted Description Text -->
         <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <!-- Header tabs -->
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div class="flex items-center space-x-2">
-              <button id="tabTextBtn" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                Текст описания
-              </button>
-              <button id="tabEmbedBtn" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-slate-800">
-                Предпросмотр плеера
-              </button>
-            </div>
+            <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2">
+              <i data-lucide="file-text" class="w-4 h-4 text-amber-400"></i>
+              <span>Текст описания</span>
+            </h2>
 
             <button id="copyBtn" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/10 cursor-pointer">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
@@ -169,9 +176,8 @@
             </button>
           </div>
 
-          <!-- Text View Tab -->
-          <div id="tabTextContent" class="space-y-3">
-            <textarea id="outputArea" readonly rows="18" placeholder="Здесь будет сгенерированный текст таймкодов..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 focus:outline-none resize-none leading-relaxed select-all placeholder-slate-700"></textarea>
+          <div class="space-y-3">
+            <textarea id="outputArea" readonly rows="12" placeholder="Здесь будет сгенерированный текст таймкодов..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 focus:outline-none resize-none leading-relaxed select-all placeholder-slate-700"></textarea>
 
             <div class="flex items-center justify-between text-xs text-slate-500 px-1">
               <span>Символов: <strong id="charCount" class="text-slate-300">0</strong></span>
@@ -181,13 +187,6 @@
               </a>
             </div>
           </div>
-
-          <!-- Embed View Tab -->
-          <div id="tabEmbedContent" class="hidden space-y-4">
-            <div id="playerContainer"></div>
-            <div id="jumpMomentsContainer" class="space-y-2"></div>
-          </div>
-
         </div>
 
       </div>
@@ -209,7 +208,9 @@
       hashtags: '',
       mainMoments: [],
       extraStreams: [],
-      activeSeekTime: null
+      activePlayerStreamId: 'all',
+      activeSeekTimes: {},
+      playerViewMode: 'phone'
     };
 
     // --- Utilities ---
@@ -280,8 +281,231 @@
       if (!input) return '';
       const trimmed = input.trim();
       if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
-      const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-      return match ? match[1] : '';
+
+      // Common YouTube patterns: watch?v=, live/, shorts/, embed/, v/, youtu.be/
+      const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|live\/|shorts\/))([\w-]{11})/i);
+      if (match && match[1]) return match[1];
+
+      // Query parameter v=
+      const vMatch = trimmed.match(/[?&]v=([\w-]{11})/i);
+      if (vMatch && vMatch[1]) return vMatch[1];
+
+      // Any path with /live/, /shorts/, /embed/, /v/
+      const pathMatch = trimmed.match(/\/(?:live|shorts|embed|v)\/([\w-]{11})/i);
+      if (pathMatch && pathMatch[1]) return pathMatch[1];
+
+      return '';
+    }
+
+    function getTwitchParentParams() {
+      const host = window.location.hostname || 'localhost';
+      const parentDomains = new Set([
+        host,
+        'localhost',
+        '127.0.0.1',
+        'ai.studio',
+        'google.com',
+        'googleusercontent.com',
+        'run.app',
+        'asia-east1.run.app'
+      ]);
+
+      try {
+        if (window.parent && window.parent.location && window.parent.location.hostname) {
+          parentDomains.add(window.parent.location.hostname);
+        }
+      } catch (e) {}
+
+      if (host && host.includes('.')) {
+        const parts = host.split('.');
+        for (let i = 0; i < parts.length - 1; i++) {
+          const domainCandidate = parts.slice(i).join('.');
+          if (domainCandidate.length > 3) parentDomains.add(domainCandidate);
+        }
+      }
+
+      return Array.from(parentDomains).filter(Boolean).map(p => `parent=${encodeURIComponent(p)}`).join('&');
+    }
+
+    function extractTwitchTimeSecs(url) {
+      if (!url) return null;
+      const match = url.match(/[?&]t=([0-9hms]+)/i);
+      if (!match) return null;
+      const tStr = match[1];
+      let total = 0;
+      const hMatch = tStr.match(/(\d+)h/i);
+      const mMatch = tStr.match(/(\d+)m/i);
+      const sMatch = tStr.match(/(\d+)s/i);
+      if (hMatch) total += parseInt(hMatch[1]) * 3600;
+      if (mMatch) total += parseInt(mMatch[1]) * 60;
+      if (sMatch) total += parseInt(sMatch[1]);
+      if (!hMatch && !mMatch && !sMatch && /^\d+$/.test(tStr)) {
+        total = parseInt(tStr);
+      }
+      return total > 0 ? total : null;
+    }
+
+    function extractYouTubeTimeSecs(url) {
+      if (!url) return null;
+      const match = url.match(/[?&](?:t|start)=([0-9hms]+)/i);
+      if (!match) return null;
+      const tStr = match[1];
+      let total = 0;
+      const hMatch = tStr.match(/(\d+)h/i);
+      const mMatch = tStr.match(/(\d+)m/i);
+      const sMatch = tStr.match(/(\d+)s/i);
+      if (hMatch) total += parseInt(hMatch[1], 10) * 3600;
+      if (mMatch) total += parseInt(mMatch[1], 10) * 60;
+      if (sMatch) total += parseInt(sMatch[1], 10);
+      if (!hMatch && !mMatch && !sMatch && /^\d+$/.test(tStr)) {
+        total = parseInt(tStr, 10);
+      }
+      return total > 0 ? total : null;
+    }
+
+    function getEmbedInfo(url, seekSecs) {
+      if (!url) return null;
+      const trimmed = url.trim();
+
+      // 1. YouTube (watch, live, shorts, embed, youtu.be)
+      const ytId = extractVideoId(trimmed);
+      if (ytId) {
+        const urlTimeSecs = extractYouTubeTimeSecs(trimmed);
+        const secs = seekSecs !== null ? seekSecs : urlTimeSecs;
+        const startParam = secs !== null && secs > 0 ? `&start=${secs}` : '';
+        return {
+          platform: 'YouTube',
+          embedUrl: `https://www.youtube.com/embed/${ytId}?autoplay=0&enablejsapi=1&rel=0${startParam}`,
+          allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen'
+        };
+      }
+
+      // 2. Twitch (Live, VOD, Clip)
+      if (trimmed.includes('twitch.tv')) {
+        const parentParams = getTwitchParentParams();
+        const initialTwitchTime = extractTwitchTimeSecs(trimmed);
+        const effectiveSecs = seekSecs !== null ? seekSecs : initialTwitchTime;
+
+        const clipMatch = trimmed.match(/(?:clips\.twitch\.tv\/|twitch\.tv\/[^\/]+\/clip\/)([a-zA-Z0-9_-]+)/i);
+        if (clipMatch) {
+          return {
+            platform: 'Twitch Клип',
+            embedUrl: `https://clips.twitch.tv/embed?clip=${clipMatch[1]}&${parentParams}`,
+            allow: 'autoplay; fullscreen; picture-in-picture',
+            isTwitch: true,
+            directUrl: `https://clips.twitch.tv/${clipMatch[1]}`
+          };
+        }
+
+        const vodMatch = trimmed.match(/twitch\.tv\/videos\/(\d+)/i);
+        if (vodMatch) {
+          const timeParam = effectiveSecs !== null && effectiveSecs > 0 ? `&time=${effectiveSecs}s` : '';
+          return {
+            platform: 'Twitch VOD',
+            embedUrl: `https://player.twitch.tv/?video=${vodMatch[1]}&${parentParams}&autoplay=false${timeParam}`,
+            allow: 'autoplay; fullscreen; picture-in-picture',
+            isTwitch: true,
+            directUrl: buildTimestampLink(trimmed, effectiveSecs !== null ? effectiveSecs + 's' : '')
+          };
+        }
+
+        const channelMatch = trimmed.match(/twitch\.tv\/([a-zA-Z0-9_]+)/i);
+        if (channelMatch && !['videos', 'directory', 'downloads', 'p', 'clips'].includes(channelMatch[1].toLowerCase())) {
+          return {
+            platform: 'Twitch Live',
+            embedUrl: `https://player.twitch.tv/?channel=${channelMatch[1]}&${parentParams}&autoplay=false`,
+            allow: 'autoplay; fullscreen; picture-in-picture',
+            isTwitch: true,
+            directUrl: `https://www.twitch.tv/${channelMatch[1]}`
+          };
+        }
+      }
+
+      // 3. VK Video & VK Clips
+      const vkVideoMatch = trimmed.match(/video(-?\d+)_(\d+)/i);
+      if (vkVideoMatch) {
+        const timeParam = seekSecs !== null && seekSecs > 0 ? `&t=${seekSecs}s` : '';
+        return {
+          platform: 'VK Видео',
+          embedUrl: `https://vk.com/video_ext.php?oid=${vkVideoMatch[1]}&id=${vkVideoMatch[2]}&hash=&hd=2${timeParam}`,
+          allow: 'autoplay; encrypted-media; fullscreen'
+        };
+      }
+
+      const vkExtMatch = trimmed.match(/vk\.com\/video_ext\.php\?([^"'\s]+)/i);
+      if (vkExtMatch) {
+        return {
+          platform: 'VK Видео',
+          embedUrl: `https://vk.com/video_ext.php?${vkExtMatch[1]}`,
+          allow: 'autoplay; encrypted-media; fullscreen'
+        };
+      }
+
+      const vkClipMatch = trimmed.match(/clip(-?\d+)_(\d+)/i);
+      if (vkClipMatch) {
+        return {
+          platform: 'VK Клипы',
+          embedUrl: `https://vk.com/video_ext.php?oid=${vkClipMatch[1]}&id=${vkClipMatch[2]}&hash=&hd=2`,
+          allow: 'autoplay; encrypted-media; fullscreen'
+        };
+      }
+
+      // 4. VK Live / VK Play Live
+      if (trimmed.includes('live.vkvideo.ru') || trimmed.includes('vkplay.live') || trimmed.includes('live.vkplay.ru') || trimmed.includes('vk.com/live')) {
+        const vkLiveChannel = trimmed.match(/(?:live\.vkvideo\.ru|vkplay\.live|live\.vkplay\.ru|vk\.com\/live)\/([a-zA-Z0-9_.-]+)/i);
+        if (vkLiveChannel && vkLiveChannel[1] !== 'app') {
+          return {
+            platform: 'VK Live',
+            embedUrl: `https://live.vkvideo.ru/app/embed/${vkLiveChannel[1]}`,
+            allow: 'autoplay; encrypted-media; fullscreen'
+          };
+        }
+      }
+
+      // 5. Kick (Live, VOD, Clip)
+      if (trimmed.includes('kick.com')) {
+        const kickClipMatch = trimmed.match(/kick\.com\/(?:clips\/|[^\/]+\?clip=)([a-zA-Z0-9_-]+)/i);
+        if (kickClipMatch) {
+          return {
+            platform: 'Kick Клип',
+            embedUrl: `https://player.kick.com/clips/${kickClipMatch[1]}`,
+            allow: 'autoplay; fullscreen'
+          };
+        }
+
+        const kickVideoMatch = trimmed.match(/kick\.com\/(?:video\/|[^\/]+\/videos\/)([a-zA-Z0-9_-]+)/i);
+        if (kickVideoMatch) {
+          return {
+            platform: 'Kick VOD',
+            embedUrl: `https://player.kick.com/video/${kickVideoMatch[1]}`,
+            allow: 'autoplay; fullscreen'
+          };
+        }
+
+        const kickChannelMatch = trimmed.match(/kick\.com\/([a-zA-Z0-9_]+)/i);
+        if (kickChannelMatch && !['video', 'category', 'clips'].includes(kickChannelMatch[1].toLowerCase())) {
+          return {
+            platform: 'Kick',
+            embedUrl: `https://player.kick.com/${kickChannelMatch[1]}`,
+            allow: 'autoplay; fullscreen'
+          };
+        }
+      }
+
+      // 6. Rutube
+      if (trimmed.includes('rutube.ru')) {
+        const rutubeMatch = trimmed.match(/rutube\.ru\/(?:video|play\/embed)\/([a-zA-Z0-9_-]+)/i);
+        if (rutubeMatch) {
+          const timeParam = seekSecs !== null && seekSecs > 0 ? `?t=${seekSecs}` : '';
+          return {
+            platform: 'Rutube',
+            embedUrl: `https://rutube.ru/play/embed/${rutubeMatch[1]}/${timeParam}`,
+            allow: 'autoplay; encrypted-media; fullscreen'
+          };
+        }
+      }
+
+      return null;
     }
 
     function appendTimestampToUrl(baseUrl, timeStr) {
@@ -473,72 +697,584 @@
       updatePlayerTab();
     }
 
-    function updatePlayerTab() {
-      const container = document.getElementById('playerContainer');
-      const jumpContainer = document.getElementById('jumpMomentsContainer');
-      const platform = detectPlatform(state.videoId);
-      const cleanId = extractVideoId(state.videoId);
-
-      if (platform === 'youtube' && cleanId) {
-        container.innerHTML = `
-          <div class="aspect-video w-full rounded-xl overflow-hidden border border-slate-800 bg-black">
-            <iframe
-              src="https://www.youtube.com/embed/${cleanId}?autoplay=0${state.activeSeekTime !== null ? '&start=' + state.activeSeekTime : ''}"
-              title="YouTube player"
-              class="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-            ></iframe>
-          </div>
-        `;
-      } else if (state.videoId.trim()) {
-        const targetUrl = buildTimestampLink(state.videoId, state.activeSeekTime !== null ? state.activeSeekTime + 's' : '');
-        container.innerHTML = `
-          <div class="aspect-video w-full rounded-xl border border-slate-800 bg-slate-950 p-6 flex flex-col items-center justify-center text-center space-y-3">
-            <p class="text-xs text-slate-400">Прямой переход для ссылки: <span class="font-mono text-amber-400">${escapeHtml(state.videoId)}</span></p>
-            <a href="${targetUrl}" target="_blank" class="inline-flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors">
-              <span>Открыть видео (${platform.toUpperCase()})</span>
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-            </a>
-          </div>
-        `;
-      } else {
-        container.innerHTML = `
-          <div class="aspect-video w-full rounded-xl border border-slate-800 bg-slate-950 flex items-center justify-center text-xs text-slate-600">
-            Укажите ссылку или ID видео для предпросмотра
-          </div>
-        `;
-      }
-
-      if (state.mainMoments.length > 0) {
-        let jumpHtml = `<p class="text-xs font-semibold text-slate-400">Переход к моментам:</p><div class="flex flex-wrap gap-1.5">`;
-        state.mainMoments.forEach((m) => {
-          if (m.time) {
-            const secs = timeToSeconds(m.time);
-            jumpHtml += `
-              <button onclick="seekToTime(${secs})" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-[11px] font-mono text-amber-400 hover:text-amber-300 transition-colors cursor-pointer">
-                ${escapeHtml(m.time)}
-              </button>
-            `;
-          }
-        });
-        jumpHtml += `</div>`;
-        jumpContainer.innerHTML = jumpHtml;
-      } else {
-        jumpContainer.innerHTML = '';
-      }
-
-      lucide.createIcons();
+    function formatSecondsToHHMMSS(totalSecs) {
+      if (totalSecs === null || totalSecs === undefined || isNaN(totalSecs) || totalSecs < 0) return '0:00';
+      const h = Math.floor(totalSecs / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = Math.floor(totalSecs % 60);
+      const mStr = (h > 0 && m < 10) ? '0' + m : String(m);
+      const sStr = s < 10 ? '0' + s : String(s);
+      return h > 0 ? `${h}:${mStr}:${sStr}` : `${mStr}:${sStr}`;
     }
 
-    function seekToTime(secs) {
-      state.activeSeekTime = secs;
+    function getStreamById(streamId) {
+      if (streamId === 'main') {
+        return {
+          id: 'main',
+          title: state.mainTitle.trim() || 'Основной',
+          url: state.videoId.trim(),
+          moments: state.mainMoments,
+          isMain: true
+        };
+      }
+      const st = state.extraStreams.find(s => s.id === streamId);
+      if (st) {
+        return {
+          id: st.id,
+          title: st.title.trim() || 'Доп. стрим',
+          url: st.streamUrl.trim() || state.videoId.trim(),
+          moments: st.moments,
+          isMain: false
+        };
+      }
+      return null;
+    }
+
+    function switchPlayerStream(streamId) {
+      state.activePlayerStreamId = streamId;
+      state.activeSeekTime = null;
       updatePlayerTab();
+    }
+
+    function updateStreamCurrentTimeUI(streamId, curSecs) {
+      if (curSecs === null || curSecs === undefined || curSecs < 0 || isNaN(curSecs)) return;
+      state.activeSeekTimes[streamId] = curSecs;
+
+      const cardEl = document.getElementById(`player-card-${streamId}`);
+      if (!cardEl) return;
+
+      const timeStr = formatSecondsToHHMMSS(curSecs);
+
+      // 1. Update text input value if not currently focused by user
+      const inputEl = cardEl.querySelector('.frame-time-input');
+      if (inputEl && document.activeElement !== inputEl) {
+        if (inputEl.value !== timeStr) {
+          inputEl.value = timeStr;
+        }
+      }
+
+      // 2. Highlight matching moment chip
+      const chips = cardEl.querySelectorAll('.moment-chip-btn');
+      chips.forEach(chip => {
+        const chipSecs = parseInt(chip.getAttribute('data-secs'), 10);
+        const isSel = (chipSecs === curSecs);
+        if (isSel) {
+          chip.className = "moment-chip-btn shrink-0 px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center space-x-1.5 transition-all active:scale-95 cursor-pointer bg-amber-500 text-slate-950 font-bold border-amber-400 shadow-md shadow-amber-500/20";
+        } else {
+          chip.className = "moment-chip-btn shrink-0 px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center space-x-1.5 transition-all active:scale-95 cursor-pointer bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800 hover:border-amber-500/40";
+        }
+      });
+    }
+
+    function seekToStreamTime(streamId, secs) {
+      state.activeSeekTimes[streamId] = secs;
+      updateStreamCurrentTimeUI(streamId, secs);
+      updatePlayerTab();
+
+      // Force re-seek on every click (even consecutive clicks on the same timestamp)
+      setTimeout(() => {
+        const cardEl = document.getElementById(`player-card-${streamId}`);
+        if (cardEl) {
+          const iframe = cardEl.querySelector('iframe');
+          const stream = getStreamById(streamId);
+          if (iframe && stream && stream.url) {
+            const embedInfo = getEmbedInfo(stream.url, secs);
+            if (embedInfo && embedInfo.embedUrl) {
+              let reseekUrl = embedInfo.embedUrl;
+              const nonce = Date.now();
+              const sep = reseekUrl.includes('?') ? '&' : '?';
+              reseekUrl += `${sep}_ts=${nonce}&autoplay=1`;
+              iframe.src = reseekUrl;
+
+              try {
+                iframe.contentWindow.postMessage(JSON.stringify({
+                  event: 'command',
+                  func: 'seekTo',
+                  args: [secs, true]
+                }), '*');
+              } catch (e) {}
+            }
+          }
+        }
+      }, 10);
+    }
+
+    function adjustStreamSeekTime(streamId, deltaSecs) {
+      const current = state.activeSeekTimes[streamId] || 0;
+      seekToStreamTime(streamId, Math.max(0, current + deltaSecs));
+    }
+
+    function handleManualTimeSeek(streamId, val) {
+      if (!val) return;
+      const secs = timeToSeconds(val.trim());
+      seekToStreamTime(streamId, secs);
+    }
+
+    function addCurrentTimeMoment(streamId) {
+      const secs = state.activeSeekTimes[streamId] || 0;
+      const timeStr = formatSecondsToHHMMSS(secs);
+
+      if (streamId === 'main') {
+        state.mainMoments.push({
+          id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
+          title: '',
+          time: timeStr,
+          videoUrlOverride: '',
+          subMoments: []
+        });
+        renderMainMoments();
+        showToast(`Момент (${timeStr}) добавлен в список!`);
+      } else {
+        const extra = state.extraStreams.find(s => s.id === streamId);
+        if (extra) {
+          extra.moments.push({
+            id: 'em_' + Date.now() + Math.random().toString(36).substr(2, 4),
+            title: '',
+            time: timeStr,
+            videoUrlOverride: '',
+            subMoments: []
+          });
+          renderExtraStreams();
+          showToast(`Момент (${timeStr}) добавлен в ${extra.title || 'доп. стрим'}!`);
+        }
+      }
+    }
+
+    function addCurrentTimeReaction(streamId) {
+      const secs = state.activeSeekTimes[streamId] || 0;
+      const timeStr = formatSecondsToHHMMSS(secs);
+
+      if (streamId === 'main') {
+        state.mainMoments.push({
+          id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
+          title: 'Пятёрка смотрит ""',
+          time: timeStr,
+          videoUrlOverride: '',
+          subMoments: []
+        });
+        renderMainMoments();
+        showToast(`Реакция (${timeStr}) добавлена!`);
+      } else {
+        const extra = state.extraStreams.find(s => s.id === streamId);
+        if (extra) {
+          extra.moments.push({
+            id: 'em_' + Date.now() + Math.random().toString(36).substr(2, 4),
+            title: 'Пятёрка смотрит ""',
+            time: timeStr,
+            videoUrlOverride: '',
+            subMoments: []
+          });
+          renderExtraStreams();
+          showToast(`Реакция (${timeStr}) добавлена!`);
+        }
+      }
+    }
+
+    function copyCurrentTimeLink(streamId) {
+      const stream = getStreamById(streamId);
+      if (!stream || !stream.url) {
+        showToast('Укажите ссылку на стрим');
+        return;
+      }
+      const secs = state.activeSeekTimes[streamId] || 0;
+      const timeStr = formatSecondsToHHMMSS(secs);
+      const link = buildTimestampLink(stream.url, timeStr);
+      if (link) {
+        navigator.clipboard.writeText(link);
+        showToast(`Ссылка кадра (${timeStr}) скопирована!`);
+      }
+    }
+
+    function switchPlayerFilter(filterId) {
+      state.activePlayerStreamId = filterId;
+      updatePlayerTab();
+    }
+
+    function copyMomentLink(url, timeStr) {
+      const link = buildTimestampLink(url, timeStr);
+      if (link) {
+        navigator.clipboard.writeText(link);
+        showToast('Ссылка с таймкодом скопирована!');
+      } else {
+        showToast('Укажите ссылку на стрим');
+      }
     }
 
     function escapeHtml(str) {
       if (!str) return '';
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function updatePlayerTab() {
+      const container = document.getElementById('allPlayersContainer');
+      if (!container) return;
+
+      // Collect main stream
+      const mainStream = {
+        id: 'main',
+        title: state.mainTitle.trim() || 'Основной',
+        url: state.videoId.trim(),
+        moments: state.mainMoments,
+        isMain: true
+      };
+
+      // Collect valid extra streams
+      const validExtraStreams = [];
+      state.extraStreams.forEach((st, idx) => {
+        const url = st.streamUrl.trim();
+        if (url) {
+          validExtraStreams.push({
+            id: st.id,
+            title: st.title.trim() || `Доп. стрим ${idx + 1}`,
+            url: url,
+            moments: st.moments,
+            isMain: false
+          });
+        }
+      });
+
+      const totalPlayersCount = 1 + validExtraStreams.length;
+
+      // Filter logic
+      let streamsToRender = [];
+      if (state.activePlayerStreamId === 'all') {
+        streamsToRender = [mainStream, ...validExtraStreams];
+      } else if (state.activePlayerStreamId === 'main') {
+        streamsToRender = [mainStream];
+      } else {
+        const sel = validExtraStreams.find(s => s.id === state.activePlayerStreamId);
+        if (sel) {
+          streamsToRender = [sel];
+        } else {
+          state.activePlayerStreamId = 'all';
+          streamsToRender = [mainStream, ...validExtraStreams];
+        }
+      }
+
+      // 1. Filter Tabs Header (only if validExtraStreams.length > 0)
+      let tabsHeaderEl = document.getElementById('playerTabsHeader');
+      if (validExtraStreams.length > 0) {
+        if (!tabsHeaderEl) {
+          tabsHeaderEl = document.createElement('div');
+          tabsHeaderEl.id = 'playerTabsHeader';
+          tabsHeaderEl.className = 'flex items-center justify-between bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3 shadow-xl gap-2 flex-wrap mb-4';
+          container.prepend(tabsHeaderEl);
+        }
+
+        let tabsBtnsHtml = `
+          <div class="flex items-center space-x-2 text-xs font-semibold text-slate-300">
+            <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
+            <span>Плееры (${totalPlayersCount}):</span>
+          </div>
+          <div class="flex items-center space-x-1.5 overflow-x-auto max-w-full py-0.5 custom-scrollbar">
+            <button onclick="switchPlayerFilter('all')" class="px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${state.activePlayerStreamId === 'all' ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-sm' : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800'}">
+              Все (${totalPlayersCount})
+            </button>
+            <button onclick="switchPlayerFilter('main')" class="px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${state.activePlayerStreamId === 'main' ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-sm' : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800'}">
+              ${escapeHtml(mainStream.title)}
+            </button>
+        `;
+
+        validExtraStreams.forEach(st => {
+          const isActive = state.activePlayerStreamId === st.id;
+          const activeStyle = isActive
+            ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
+            : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800';
+          tabsBtnsHtml += `
+            <button onclick="switchPlayerFilter('${st.id}')" class="px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${activeStyle}">
+              ${escapeHtml(st.title)}
+            </button>
+          `;
+        });
+
+        tabsBtnsHtml += `</div>`;
+        if (tabsHeaderEl.innerHTML !== tabsBtnsHtml) {
+          tabsHeaderEl.innerHTML = tabsBtnsHtml;
+        }
+      } else if (tabsHeaderEl) {
+        tabsHeaderEl.remove();
+      }
+
+      // 2. Manage Player Cards
+      const currentRenderedIds = new Set(streamsToRender.map(s => s.id));
+
+      // Remove cards that are no longer active
+      const existingCards = Array.from(container.querySelectorAll('.player-card-item'));
+      existingCards.forEach(card => {
+        const cardId = card.getAttribute('data-stream-id');
+        if (!currentRenderedIds.has(cardId)) {
+          card.remove();
+        }
+      });
+
+      // Render or Update each card
+      streamsToRender.forEach((stream) => {
+        const seekSecs = state.activeSeekTimes[stream.id] !== undefined ? state.activeSeekTimes[stream.id] : null;
+        const embedInfo = getEmbedInfo(stream.url, seekSecs);
+        const platform = detectPlatform(stream.url);
+
+        let cardTitle = 'Предпросмотр плеера';
+        if (!stream.isMain) {
+          cardTitle = `Предпросмотр плеера «${escapeHtml(stream.title)}»`;
+        } else if (state.mainTitle.trim() && state.mainTitle.trim() !== 'Основной' && state.mainTitle.trim() !== 'Основной стрим') {
+          cardTitle = `Предпросмотр плеера «${escapeHtml(state.mainTitle.trim())}»`;
+        }
+
+        let cardEl = document.getElementById(`player-card-${stream.id}`);
+        if (!cardEl) {
+          cardEl = document.createElement('div');
+          cardEl.id = `player-card-${stream.id}`;
+          cardEl.setAttribute('data-stream-id', stream.id);
+          cardEl.className = `player-card-item bg-slate-900/90 backdrop-blur-md border ${stream.isMain ? 'border-slate-800' : 'border-purple-500/30'} rounded-2xl p-3 sm:p-5 shadow-2xl space-y-4 mb-6`;
+          cardEl.innerHTML = `
+            <div class="player-header-slot"></div>
+            <div class="player-embed-slot"></div>
+            <div class="player-controls-slot"></div>
+            <div class="player-moments-slot"></div>
+          `;
+          container.appendChild(cardEl);
+        }
+
+        // Title & Header HTML
+        let platformBadge = '';
+        if (embedInfo) {
+          const badgeColor = embedInfo.platform.includes('YouTube') ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                             embedInfo.platform.includes('Twitch') ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
+                             embedInfo.platform.includes('VK') ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' :
+                             embedInfo.platform.includes('Kick') ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                             'bg-amber-500/10 text-amber-400 border-amber-500/20';
+          platformBadge = `<span class="text-[10px] font-mono font-semibold ${badgeColor} border px-2 py-0.5 rounded-md">${embedInfo.platform}</span>`;
+        }
+
+        let extraHeaderAction = '';
+        if (embedInfo && embedInfo.isTwitch) {
+          extraHeaderAction = `
+            <a href="${escapeHtml(embedInfo.directUrl)}" target="_blank" class="inline-flex items-center space-x-1 px-2 py-0.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md text-[11px] font-semibold transition-colors cursor-pointer" title="Открыть в Twitch">
+              <span>Twitch</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          `;
+        }
+
+        const headerKey = `${cardTitle}_${embedInfo ? embedInfo.platform : ''}`;
+        const headerSlot = cardEl.querySelector('.player-header-slot');
+        if (headerSlot && headerSlot.getAttribute('data-header-key') !== headerKey) {
+          headerSlot.setAttribute('data-header-key', headerKey);
+          headerSlot.innerHTML = `
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+              <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2 min-w-0">
+                <i data-lucide="play-circle" class="w-4 h-4 ${stream.isMain ? 'text-amber-400' : 'text-purple-400'} shrink-0"></i>
+                <span class="truncate">${cardTitle}</span>
+              </h2>
+              <div class="flex items-center space-x-2">
+                ${extraHeaderAction}
+                ${platformBadge}
+              </div>
+            </div>
+          `;
+        }
+
+        // Embed Slot Update
+        const embedSlot = cardEl.querySelector('.player-embed-slot');
+        if (embedSlot) {
+          const currentMode = embedSlot.getAttribute('data-mode');
+
+          if (embedInfo) {
+            const targetEmbedUrl = embedInfo.embedUrl;
+            const existingIframe = embedSlot.querySelector('iframe');
+            const currentIframeSrc = existingIframe ? existingIframe.getAttribute('src') : null;
+
+            if (currentMode !== 'iframe' || (currentIframeSrc && !currentIframeSrc.startsWith(targetEmbedUrl.split('?')[0]))) {
+              embedSlot.setAttribute('data-mode', 'iframe');
+              embedSlot.removeAttribute('data-url');
+              embedSlot.innerHTML = `
+                <div class="aspect-video w-full rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-2xl relative">
+                  <iframe
+                    src="${embedInfo.embedUrl}"
+                    title="${cardTitle}"
+                    class="w-full h-full border-0"
+                    allow="${embedInfo.allow}"
+                    allowfullscreen
+                  ></iframe>
+                </div>
+              `;
+            }
+          } else if (stream.url) {
+            const targetUrl = buildTimestampLink(stream.url, seekSecs !== null ? seekSecs + 's' : '');
+            const platformName = platform === 'twitch' ? 'Twitch' : platform === 'kick' ? 'Kick' : platform === 'vk_live' ? 'VK Live' : platform === 'vk' ? 'VK Видео' : 'Видео';
+            const currentUrl = embedSlot.getAttribute('data-url');
+
+            if (currentMode !== 'fallback' || currentUrl !== targetUrl) {
+              embedSlot.setAttribute('data-mode', 'fallback');
+              embedSlot.setAttribute('data-url', targetUrl);
+              embedSlot.innerHTML = `
+                <div class="aspect-video w-full rounded-2xl border border-slate-800 bg-slate-950/80 p-5 flex flex-col items-center justify-center text-center space-y-3 shadow-inner">
+                  <div class="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-xs font-semibold">
+                    <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                    <span>${platformName} Stream</span>
+                  </div>
+                  <p class="text-xs text-slate-400 max-w-sm truncate font-mono">${escapeHtml(stream.url)}</p>
+                  <a href="${targetUrl}" target="_blank" class="inline-flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-lg shadow-amber-500/10 cursor-pointer">
+                    <span>Открыть ${platformName} в новом окне</span>
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                  </a>
+                </div>
+              `;
+            }
+          } else {
+            if (currentMode !== 'empty') {
+              embedSlot.setAttribute('data-mode', 'empty');
+              embedSlot.removeAttribute('data-url');
+              embedSlot.innerHTML = `
+                <div class="aspect-video w-full rounded-xl border border-dashed border-slate-800 bg-slate-950/40 flex flex-col items-center justify-center text-center p-6 space-y-2">
+                  <i data-lucide="tv" class="w-8 h-8 text-slate-600 mb-1"></i>
+                  <p class="text-xs text-slate-400 font-medium">Укажите ссылку на стрим</p>
+                  <p class="text-[11px] text-slate-600">Вставьте ссылку в поле "Ссылка" для активации плеера</p>
+                </div>
+              `;
+            }
+          }
+        }
+
+        // Seek Controls Slot
+        const controlsSlot = cardEl.querySelector('.player-controls-slot');
+        if (controlsSlot) {
+          if (stream.url) {
+            const formattedCurrent = formatSecondsToHHMMSS(seekSecs || 0);
+            const controlsKey = `${stream.url}_${seekSecs}`;
+
+            if (controlsSlot.getAttribute('data-controls-key') !== controlsKey) {
+              controlsSlot.setAttribute('data-controls-key', controlsKey);
+              controlsSlot.innerHTML = `
+                <div class="pt-1">
+                  <!-- Main Controls Row without dark outer box -->
+                  <div class="flex items-center justify-between w-full gap-2">
+                    <!-- Left: Time input window pill -->
+                    <div>
+                      <input 
+                        type="text" 
+                        value="${formattedCurrent}" 
+                        onchange="handleManualTimeSeek('${stream.id}', this.value)"
+                        onkeydown="if(event.key==='Enter') handleManualTimeSeek('${stream.id}', this.value)"
+                        class="frame-time-input w-24 bg-slate-950 border-2 border-amber-400 text-amber-400 font-mono font-bold text-sm rounded-full px-3 py-1.5 text-center focus:outline-none focus:border-amber-300 focus:ring-2 focus:ring-amber-400/50 shadow-lg shadow-amber-500/10"
+                        title="Введите таймкод и нажмите Enter"
+                      />
+                    </div>
+
+                    <!-- Right: + Реакция and + Момент buttons -->
+                    <div class="flex items-center space-x-2 shrink-0">
+                      <!-- Purple Reaction (+ Реакция) button -->
+                      <button 
+                        onclick="addCurrentTimeReaction('${stream.id}')" 
+                        class="inline-flex items-center space-x-1 px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 active:scale-95 text-white rounded-full font-bold text-xs shadow-md shadow-purple-600/30 transition-all cursor-pointer" 
+                        title="Добавить как Реакцию (Пятёрка смотрит...)"
+                      >
+                        <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[3]"></i>
+                        <span>Реакция</span>
+                      </button>
+
+                      <!-- Yellow Moment (+ Момент) button -->
+                      <button 
+                        onclick="addCurrentTimeMoment('${stream.id}')" 
+                        class="inline-flex items-center space-x-1 px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 rounded-full font-extrabold text-xs shadow-md shadow-amber-400/30 transition-all cursor-pointer" 
+                        title="Быстро добавить этот таймкод в моменты"
+                      >
+                        <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[3]"></i>
+                        <span>Момент</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }
+          } else {
+            if (controlsSlot.getAttribute('data-controls-key') !== 'none') {
+              controlsSlot.setAttribute('data-controls-key', 'none');
+              controlsSlot.innerHTML = '';
+            }
+          }
+        }
+
+        // Moments Slot
+        let momentsHtml = '';
+        const moments = stream.moments || [];
+        if (moments.length > 0) {
+          let itemsListHtml = '';
+          moments.forEach((m, idx) => {
+            const timeStr = m.time ? m.time.trim() : '0:00';
+            const secs = timeToSeconds(timeStr);
+            const titleStr = m.title.trim() || `Момент ${idx + 1}`;
+            const isSelected = seekSecs !== null && seekSecs === secs;
+            const itemUrl = m.videoUrlOverride ? m.videoUrlOverride.trim() : stream.url;
+
+            itemsListHtml += `
+              <div class="flex items-center justify-between p-2 rounded-xl bg-slate-950/60 border ${isSelected ? 'border-amber-500/60 bg-amber-500/5' : 'border-slate-800/80 hover:border-slate-700'} transition-all group">
+                <div class="flex items-center space-x-2 min-w-0 pr-2">
+                  <span class="text-[10px] font-mono text-slate-500 w-4 shrink-0">${idx + 1}.</span>
+                  <span class="text-xs text-slate-200 truncate font-medium" title="${escapeHtml(titleStr)}">${escapeHtml(titleStr)}</span>
+                </div>
+                <div class="flex items-center space-x-1 shrink-0">
+                  <button onclick="seekToStreamTime('${stream.id}', ${secs})" class="inline-flex items-center space-x-1 px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg text-[11px] font-mono font-semibold transition-all cursor-pointer">
+                    <i data-lucide="play" class="w-2.5 h-2.5"></i>
+                    <span>${escapeHtml(timeStr)}</span>
+                  </button>
+                  <button onclick="copyMomentLink('${escapeHtml(itemUrl)}', '${escapeHtml(timeStr)}')" class="p-1 text-slate-500 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer" title="Скопировать ссылку с таймкодом">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+
+            if (m.subMoments && m.subMoments.length > 0) {
+              m.subMoments.forEach((sub, sIdx) => {
+                const subTimeStr = sub.time ? sub.time.trim() : '0:00';
+                const subSecs = timeToSeconds(subTimeStr);
+                const subTitleStr = sub.title.trim() || `Подмомент ${sIdx + 1}`;
+                const subUrl = sub.videoUrlOverride ? sub.videoUrlOverride.trim() : itemUrl;
+
+                itemsListHtml += `
+                  <div class="flex items-center justify-between py-1 px-2 ml-4 rounded-lg bg-slate-950/30 border border-slate-800/40 text-xs">
+                    <div class="flex items-center space-x-1.5 min-w-0 pr-2 text-slate-400">
+                      <span class="text-[10px] text-slate-600">↳</span>
+                      <span class="text-[11px] truncate" title="${escapeHtml(subTitleStr)}">${escapeHtml(subTitleStr)}</span>
+                    </div>
+                    <div class="flex items-center space-x-1 shrink-0">
+                      <button onclick="seekToStreamTime('${stream.id}', ${subSecs})" class="px-1.5 py-0.5 bg-slate-900 hover:bg-slate-800 text-amber-400/90 border border-slate-800 rounded text-[10px] font-mono transition-all cursor-pointer">
+                        ${escapeHtml(subTimeStr)}
+                      </button>
+                      <button onclick="copyMomentLink('${escapeHtml(subUrl)}', '${escapeHtml(subTimeStr)}')" class="p-0.5 text-slate-600 hover:text-amber-400 transition-colors cursor-pointer" title="Скопировать ссылку">
+                        <i data-lucide="copy" class="w-2.5 h-2.5"></i>
+                      </button>
+                    </div>
+                  </div>
+                `;
+              });
+            }
+          });
+
+          momentsHtml = `
+            <div class="space-y-2.5 pt-3 border-t border-slate-800/80">
+              <div class="flex items-center justify-between pb-1">
+                <span class="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
+                  <i data-lucide="list-video" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>Моменты (${moments.length})</span>
+                </span>
+                <span class="text-[10px] text-slate-500">Нажмите время для перехода</span>
+              </div>
+              <div class="space-y-1.5 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
+                ${itemsListHtml}
+              </div>
+            </div>
+          `;
+        }
+
+        const momentsSlot = cardEl.querySelector('.player-moments-slot');
+        if (momentsSlot && momentsSlot.innerHTML !== momentsHtml) {
+          momentsSlot.innerHTML = momentsHtml;
+        }
+      });
+
+      lucide.createIcons();
     }
 
     // --- Main Moments Renders & Logic ---
@@ -548,11 +1284,13 @@
       if (state.mainMoments.length === 0) {
         container.innerHTML = `
           <div class="text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950/20">
-            <p class="text-xs text-slate-500 mb-2">Основной список моментов пуст</p>
-            <button onclick="addMainMoment()" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Добавить первый момент</span>
-            </button>
+            <p class="text-xs text-slate-500 mb-3">Основной список моментов пуст</p>
+            <div class="flex items-center justify-center space-x-2 flex-wrap gap-2">
+              <button onclick="addMainMoment('Пятёрка рассказывает истории')" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Добавить начало стрима</span>
+              </button>
+            </div>
           </div>
         `;
         lucide.createIcons();
@@ -613,15 +1351,29 @@
         `;
       });
 
+      // Bottom quick action bar when items exist
+      html += `
+        <div class="pt-2 flex items-center space-x-2 flex-wrap gap-2">
+          <button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Момент</span>
+          </button>
+          <button onclick="addMainMoment('Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Реакция</span>
+          </button>
+        </div>
+      `;
+
       container.innerHTML = html;
       lucide.createIcons();
       updateOutput();
     }
 
-    function addMainMoment() {
+    function addMainMoment(initialTitle = '') {
       state.mainMoments.push({
-        id: 'm_' + Date.now(),
-        title: '',
+        id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
+        title: initialTitle,
         time: '',
         videoUrlOverride: '',
         subMoments: []
@@ -879,11 +1631,17 @@
         updateOutput();
       });
 
-      document.getElementById('videoId').addEventListener('input', (e) => {
+      const videoIdEl = document.getElementById('videoId');
+      const handleVideoIdChange = (e) => {
         state.videoId = e.target.value;
+        if (state.activePlayerStreamId !== 'all' && state.activePlayerStreamId !== 'main') {
+          state.activePlayerStreamId = 'all';
+        }
         updateBadge();
         updateOutput();
-      });
+      };
+      videoIdEl.addEventListener('input', handleVideoIdChange);
+      videoIdEl.addEventListener('change', handleVideoIdChange);
 
       document.getElementById('hashtags').addEventListener('input', (e) => {
         state.hashtags = e.target.value;
@@ -911,27 +1669,6 @@
         showToast('Форма полностью очищена');
       });
 
-      // Tabs switching
-      const textBtn = document.getElementById('tabTextBtn');
-      const embedBtn = document.getElementById('tabEmbedBtn');
-      const textContent = document.getElementById('tabTextContent');
-      const embedContent = document.getElementById('tabEmbedContent');
-
-      textBtn.addEventListener('click', () => {
-        textBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer bg-amber-500/10 text-amber-400 border border-amber-500/30';
-        embedBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-slate-800';
-        textContent.classList.remove('hidden');
-        embedContent.classList.add('hidden');
-      });
-
-      embedBtn.addEventListener('click', () => {
-        embedBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer bg-amber-500/10 text-amber-400 border border-amber-500/30';
-        textBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-slate-800';
-        embedContent.classList.remove('hidden');
-        textContent.classList.add('hidden');
-        updatePlayerTab();
-      });
-
       // Copy Button
       document.getElementById('copyBtn').addEventListener('click', () => {
         const area = document.getElementById('outputArea');
@@ -939,6 +1676,70 @@
         navigator.clipboard.writeText(area.value);
         showToast('Текст успешно скопирован!');
       });
+
+      // Video Playback Time Sync System
+      window.addEventListener('message', (e) => {
+        let data = e.data;
+        if (typeof data === 'string') {
+          try { data = JSON.parse(data); } catch(err) { return; }
+        }
+        if (!data || typeof data !== 'object') return;
+
+        // Identify source iframe
+        let sourceIframe = null;
+        const iframes = document.querySelectorAll('iframe');
+        for (let i = 0; i < iframes.length; i++) {
+          if (iframes[i].contentWindow === e.source) {
+            sourceIframe = iframes[i];
+            break;
+          }
+        }
+
+        let targetStreamId = null;
+        if (sourceIframe) {
+          const card = sourceIframe.closest('.player-card-item');
+          if (card) {
+            targetStreamId = card.getAttribute('data-stream-id');
+          }
+        }
+
+        // Parse time from YouTube or Twitch or generic payload
+        let curSecs = null;
+        if (data.event === 'infoDelivery' && data.info && typeof data.info.currentTime === 'number') {
+          curSecs = Math.floor(data.info.currentTime);
+        } else if (data.info && typeof data.info.currentTime === 'number') {
+          curSecs = Math.floor(data.info.currentTime);
+        } else if (data.m === 'timeupdate' && Array.isArray(data.a) && typeof data.a[0] === 'number') {
+          curSecs = Math.floor(data.a[0]);
+        } else if (data.type === 'player.timeupdate' && data.data && typeof data.data.currentTime === 'number') {
+          curSecs = Math.floor(data.data.currentTime);
+        }
+
+        if (targetStreamId && curSecs !== null) {
+          updateStreamCurrentTimeUI(targetStreamId, curSecs);
+        }
+      });
+
+      // Ticker interval to request playback time from active embeds
+      setInterval(() => {
+        const iframes = document.querySelectorAll('.player-embed-slot iframe');
+        iframes.forEach(iframe => {
+          try {
+            if (iframe.contentWindow) {
+              iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'listening',
+                id: 1,
+                channel: 'widget'
+              }), '*');
+              iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'getCurrentTime',
+                args: []
+              }), '*');
+            }
+          } catch(err) {}
+        });
+      }, 400);
 
       // Render initial clean view
       renderMainMoments();
