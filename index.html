@@ -261,7 +261,7 @@
                 </div>
                 <button type="button" id="fetchDateBtn" onclick="fetchVideoInfoAndApplyDate(state.videoId)" class="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0" title="Подтянуть дату публикации из ссылки на видео">
                   <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                  <span>Из видео</span>
+                  <span></span>
                 </button>
               </div>
             </div>
@@ -1738,7 +1738,7 @@
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = `<i data-lucide="calendar" class="w-3.5 h-3.5"></i><span>Из видео</span>`;
+          btn.innerHTML = `<i data-lucide="calendar" class="w-3.5 h-3.5"></i>`;
           lucide.createIcons();
         }
       }
