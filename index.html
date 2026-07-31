@@ -657,15 +657,15 @@
 
     const DEFAULT_HASHTAG_RULES = [
       // СП / Майнкрафт
-      { keyword: 'Майнкрафт', tags: '#Майнкрафт', category: 'СП / Майнкрафт', addedAt: 100 },
-      { keyword: 'СП1', tags: '#Майнкрафт #СП1', category: 'СП / Майнкрафт', addedAt: 101 },
-      { keyword: 'СП2', tags: '#Майнкрафт #СП2', category: 'СП / Майнкрафт', addedAt: 102 },
-      { keyword: 'СП3', tags: '#Майнкрафт #СП3', category: 'СП / Майнкрафт', addedAt: 103 },
-      { keyword: 'СП4', tags: '#Майнкрафт #СП4', category: 'СП / Майнкрафт', addedAt: 104 },
-      { keyword: 'СП5', tags: '#Майнкрафт #СП5', category: 'СП / Майнкрафт', addedAt: 105 },
-      { keyword: 'СПк', tags: '#Майнкрафт #СПк', category: 'СП / Майнкрафт', addedAt: 106 },
-      { keyword: 'СПmini, СПм', tags: '#Майнкрафт #СПм', category: 'СП / Майнкрафт', addedAt: 107 },
-      { keyword: 'СП Магия, СПМагия', tags: '#Майнкрафт #СПМагия', category: 'СП / Майнкрафт', addedAt: 108 },
+      { keyword: 'Майнкрафт, Minecraft, МС, MC', tags: '#Майнкрафт', category: 'СП / Майнкрафт', addedAt: 100 },
+      { keyword: 'СП1, СП 1, #СП1', tags: '#Майнкрафт #СП1', category: 'СП / Майнкрафт', addedAt: 101 },
+      { keyword: 'СП2, СП 2, #СП2', tags: '#Майнкрафт #СП2', category: 'СП / Майнкрафт', addedAt: 102 },
+      { keyword: 'СП3, СП 3, #СП3', tags: '#Майнкрафт #СП3', category: 'СП / Майнкрафт', addedAt: 103 },
+      { keyword: 'СП4, СП 4, #СП4', tags: '#Майнкрафт #СП4', category: 'СП / Майнкрафт', addedAt: 104 },
+      { keyword: 'СП5, СП 5, #СП5', tags: '#Майнкрафт #СП5', category: 'СП / Майнкрафт', addedAt: 105 },
+      { keyword: 'СПк, СП к, #СПк', tags: '#Майнкрафт #СПк', category: 'СП / Майнкрафт', addedAt: 106 },
+      { keyword: 'СПmini, СПм, СП mini, #СПм', tags: '#Майнкрафт #СПм', category: 'СП / Майнкрафт', addedAt: 107 },
+      { keyword: 'СП Магия, СПМагия, #СПМагия', tags: '#Майнкрафт #СПМагия', category: 'СП / Майнкрафт', addedAt: 108 },
       { keyword: 'гп', tags: '#Майнкрафт #гп', category: 'СП / Майнкрафт', addedAt: 109 },
       { keyword: 'Алмазная Гонка, АлмазнаяГонка', tags: '#Майнкрафт #АлмазнаяГонка', category: 'СП / Майнкрафт', addedAt: 110 },
       { keyword: 'Freak Land, FreakLand', tags: '#Майнкрафт #FreakLand', category: 'СП / Майнкрафт', addedAt: 111 },
@@ -838,11 +838,11 @@
     const savedRules = localStorage.getItem('hashtagRules');
     let hashtagRulesVal = DEFAULT_HASHTAG_RULES;
 
-    if (savedRulesVer !== 'v3') {
-      // Force refresh defaults to v3 formatted titles with spaces and colons
+    if (savedRulesVer !== 'v4') {
+      // Force refresh defaults to v4 rules with expanded keywords and symbol boundary fixes
       hashtagRulesVal = JSON.parse(JSON.stringify(DEFAULT_HASHTAG_RULES));
       localStorage.setItem('hashtagRules', JSON.stringify(hashtagRulesVal));
-      localStorage.setItem('hashtagRulesVer', 'v3');
+      localStorage.setItem('hashtagRulesVer', 'v4');
     } else if (savedRules) {
       try {
         const parsed = JSON.parse(savedRules);
@@ -1311,26 +1311,30 @@
         return [];
       }
 
-      const fullContentText = [
+      const textSources = [
         state.mainTitle || '',
+        state.videoId || '',
+        state.fetchedVideoTitle || '',
         ...(state.mainMoments ? state.mainMoments.map(m => (m.title || '') + ' ' + (m.subMoments ? m.subMoments.map(s => s.title || '').join(' ') : '')) : []),
-        ...(state.extraStreams ? state.extraStreams.map(s => (s.title || '') + ' ' + (s.moments ? s.moments.map(m => (m.title || '') + ' ' + (m.subMoments ? m.subMoments.map(sub => sub.title || '').join(' ') : '')).join(' ') : '')) : [])
-      ].join(' ');
+        ...(state.extraStreams ? state.extraStreams.map(s => (s.title || '') + ' ' + (s.streamUrl || '') + ' ' + (s.fetchedVideoTitle || '') + ' ' + (s.moments ? s.moments.map(m => (m.title || '') + ' ' + (m.subMoments ? m.subMoments.map(sub => sub.title || '').join(' ') : '')).join(' ') : '')) : [])
+      ];
+
+      const fullContentText = textSources.join(' ');
 
       const detectedSet = new Set();
 
       state.hashtagRules.forEach(rule => {
         if (!rule.keyword || !rule.tags) return;
         
-        // Split rule.keyword by comma or pipe to support multiple synonyms (e.g. "тиктоки, тикток, TikTok")
+        // Split rule.keyword by comma or pipe to support multiple synonyms (e.g. "тиктоки, тикток, TikTok, СП4, СП 4, #СП4")
         const subKeywords = rule.keyword.split(/[,|]/).map(k => k.trim()).filter(Boolean);
         if (subKeywords.length === 0) return;
 
         let matched = false;
         for (const kw of subKeywords) {
           const escapedKw = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          // Cyrillic & Latin friendly boundary matching
-          const regex = new RegExp('(?:^|[^a-zA-Z0-9а-яА-ЯёЁ_#])' + escapedKw + '(?=[^a-zA-Z0-9а-яА-ЯёЁ_]|$)', 'i');
+          // Cyrillic & Latin friendly boundary matching (without # in negative character class!)
+          const regex = new RegExp('(?:^|[^a-zA-Z0-9а-яА-ЯёЁ_])' + escapedKw + '(?=[^a-zA-Z0-9а-яА-ЯёЁ_]|$)', 'i');
           if (regex.test(fullContentText)) {
             matched = true;
             break;
@@ -2157,27 +2161,98 @@
 
       let foundDateShort = null;
       let foundDateIso = null;
+      let fetchedTitle = null;
 
-      // 1. Attempt backend API route (if running on server environment)
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1800);
-        const res = await fetch(`/api/video-info?url=${encodeURIComponent(url.trim())}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.success && (data.dateFormattedShort || data.dateFormatted)) {
-            foundDateShort = data.dateFormattedShort || data.dateFormatted;
-            foundDateIso = data.dateIso;
-          }
+      const ytId = extractVideoId(url.trim());
+
+      // 1. YouTube RSS Feed (Primary for client-side static hosting like GitHub Pages)
+      if (ytId) {
+        const rssUrl = `https://www.youtube.com/feeds/videos.xml?video_id=${ytId}`;
+        const rssProxies = [
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`,
+          `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
+          `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(rssUrl)}`,
+          rssUrl
+        ];
+
+        for (const proxyEndpoint of rssProxies) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2200);
+            const res = await fetch(proxyEndpoint, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const xmlText = await res.text();
+              if (xmlText && (xmlText.includes('<entry>') || xmlText.includes('<published>') || xmlText.includes('<title>'))) {
+                const titleM = xmlText.match(/<title>([^<]+)<\/title>/i);
+                if (titleM && titleM[1] && titleM[1].trim() !== 'YouTube' && !fetchedTitle) {
+                  fetchedTitle = titleM[1].trim();
+                }
+
+                const pubM = xmlText.match(/<published>([^<]+)<\/published>/i) || xmlText.match(/<updated>([^<]+)<\/updated>/i);
+                if (pubM && pubM[1]) {
+                  const rawPub = pubM[1].trim();
+                  const isoM = rawPub.match(/(\d{4})-(\d{2})-(\d{2})/);
+                  if (isoM) {
+                    const dateIso = `${isoM[1]}-${isoM[2]}-${isoM[3]}`;
+                    const formatted = formatDateRuClient(dateIso);
+                    foundDateShort = formatted.short;
+                    foundDateIso = formatted.iso;
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (e) {}
         }
-      } catch (e) {}
+      }
 
-      // 2. Client-side fallback for static websites (GitHub Pages, static host, etc.)
+      // 2. YouTube oEmbed (Direct CORS, for video title extraction if RSS feed lacked date)
+      if (ytId && !fetchedTitle) {
+        try {
+          const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
+          if (res.ok) {
+            const oembedData = await res.json();
+            if (oembedData && oembedData.title) {
+              fetchedTitle = oembedData.title;
+              if (!foundDateShort) {
+                const parsed = parseDateTextClient(oembedData.title);
+                if (parsed) {
+                  const formatted = formatDateRuClient(parsed);
+                  foundDateShort = formatted.short;
+                  foundDateIso = formatted.iso;
+                }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 2. Attempt backend API route (if running on server environment)
       if (!foundDateShort) {
-        const ytId = extractVideoId(url.trim());
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1800);
+          const res = await fetch(`/api/video-info?url=${encodeURIComponent(url.trim())}`, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.success) {
+              if (data.title && !fetchedTitle) fetchedTitle = data.title;
+              if (data.dateFormattedShort || data.dateFormatted) {
+                foundDateShort = data.dateFormattedShort || data.dateFormatted;
+                foundDateIso = data.dateIso;
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 3. Client-side fallback for static websites (Invidious / AllOrigins)
+      if (!foundDateShort) {
         if (ytId) {
-          // 2a. Invidious CORS APIs
+          // 3a. Invidious CORS APIs
           const invidiousEndpoints = [
             `https://inv.tux.pizza/api/v1/videos/${ytId}`,
             `https://invidious.nerdvpn.de/api/v1/videos/${ytId}`,
@@ -2192,6 +2267,7 @@
               clearTimeout(timeoutId);
               if (res.ok) {
                 const data = await res.json();
+                if (data.title && !fetchedTitle) fetchedTitle = data.title;
                 let rawDate = data.publishedText || data.uploadDate || data.published;
                 if (data.published && typeof data.published === 'number') {
                   const d = new Date(data.published * 1000);
@@ -2208,7 +2284,7 @@
             } catch (e) {}
           }
 
-          // 2b. AllOrigins CORS Proxy to parse YouTube HTML
+          // 3b. AllOrigins CORS Proxy to parse YouTube HTML
           if (!foundDateShort) {
             try {
               const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.youtube.com/watch?v=' + ytId)}`;
@@ -2219,6 +2295,10 @@
               if (res.ok) {
                 const json = await res.json();
                 const html = json.contents || '';
+                const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+                if (titleMatch && !fetchedTitle) {
+                  fetchedTitle = titleMatch[1].replace(/- YouTube$/i, '').trim();
+                }
                 const candidates = [];
                 const metaUpload = html.match(/itemprop="uploadDate"\s+content="([^"]+)"/i);
                 if (metaUpload) candidates.push(metaUpload[1]);
@@ -2236,24 +2316,6 @@
                     foundDateShort = formatted.short;
                     foundDateIso = formatted.iso;
                     break;
-                  }
-                }
-              }
-            } catch (e) {}
-          }
-
-          // 2c. YouTube oEmbed
-          if (!foundDateShort) {
-            try {
-              const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
-              if (res.ok) {
-                const oembedData = await res.json();
-                if (oembedData && oembedData.title) {
-                  const parsed = parseDateTextClient(oembedData.title);
-                  if (parsed) {
-                    const formatted = formatDateRuClient(parsed);
-                    foundDateShort = formatted.short;
-                    foundDateIso = formatted.iso;
                   }
                 }
               }
@@ -2280,6 +2342,10 @@
         }
       }
 
+      if (fetchedTitle) {
+        state.fetchedVideoTitle = fetchedTitle;
+      }
+
       if (foundDateShort) {
         state.streamDate = foundDateShort;
         const dateInput = document.getElementById('streamDate');
@@ -2293,7 +2359,8 @@
         updateOutput();
         showToast(`Дата из видео подтянута: ${foundDateShort}`);
       } else {
-        if (!isAuto) showToast('Не удалось извлечь дату из видео');
+        updateOutput();
+        if (!isAuto) showToast(fetchedTitle ? `Информация о видео загружена` : 'Не удалось извлечь дату из видео');
       }
 
       if (btn) {
@@ -3242,12 +3309,12 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
         updateBadge();
         updateOutput();
 
-        // Auto pull date from video URL if present and setting enabled
-        if (state.autoImportDate && state.videoId && state.videoId.trim()) {
+        // Always fetch video info & title when URL is present to enable auto-hashtags
+        if (state.videoId && state.videoId.trim()) {
           clearTimeout(videoDebounceTimer);
           videoDebounceTimer = setTimeout(() => {
             fetchVideoInfoAndApplyDate(state.videoId.trim(), true);
-          }, 600);
+          }, 400);
         }
       };
       videoIdEl.addEventListener('input', handleVideoIdChange);
