@@ -2165,42 +2165,81 @@
 
       const ytId = extractVideoId(url.trim());
 
-      // 1. YouTube RSS Feed (Primary for client-side static hosting like GitHub Pages)
+      // 1. YouTube RSS Feed via rss2json API (Direct JSON, fastest & CORS-friendly for static sites)
       if (ytId) {
-        const rssUrl = `https://www.youtube.com/feeds/videos.xml?video_id=${ytId}`;
-        const rssProxies = [
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
-          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`,
-          `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
-          `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(rssUrl)}`,
-          rssUrl
-        ];
+        try {
+          const rssUrl = `https://www.youtube.com/feeds/videos.xml?video_id=${ytId}`;
+          const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.status === 'ok' && data.items && data.items.length > 0) {
+              const item = data.items[0];
+              if (item.title) fetchedTitle = item.title;
+              const rawDate = item.pubDate || item.created;
+              if (rawDate) {
+                const parsed = parseDateTextClient(rawDate);
+                if (parsed) {
+                  const formatted = formatDateRuClient(parsed);
+                  foundDateShort = formatted.short;
+                  foundDateIso = formatted.iso;
+                }
+              }
+            }
+          }
+        } catch (e) {}
+      }
 
-        for (const proxyEndpoint of rssProxies) {
+      // 2. YouTube RSS XML via AllOrigins JSON Proxy
+      if (ytId && !foundDateShort) {
+        try {
+          const rssUrl = `https://www.youtube.com/feeds/videos.xml?video_id=${ytId}`;
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+          const res = await fetch(proxyUrl);
+          if (res.ok) {
+            const json = await res.json();
+            const xmlText = json.contents || '';
+            if (xmlText) {
+              const titleM = xmlText.match(/<title>([^<]+)<\/title>/i);
+              if (titleM && titleM[1] && titleM[1].trim() !== 'YouTube' && !fetchedTitle) {
+                fetchedTitle = titleM[1].trim();
+              }
+              const pubM = xmlText.match(/<published>([^<]+)<\/published>/i) || xmlText.match(/<updated>([^<]+)<\/updated>/i);
+              if (pubM && pubM[1]) {
+                const parsed = parseDateTextClient(pubM[1].trim());
+                if (parsed) {
+                  const formatted = formatDateRuClient(parsed);
+                  foundDateShort = formatted.short;
+                  foundDateIso = formatted.iso;
+                }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 3. Piped Public API Endpoints
+      if (ytId && !foundDateShort) {
+        const pipedEndpoints = [
+          `https://pipedapi.kavin.rocks/streams/${ytId}`,
+          `https://api.piped.yt/streams/${ytId}`,
+          `https://pipedapi.mha.fi/streams/${ytId}`
+        ];
+        for (const ep of pipedEndpoints) {
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2200);
-            const res = await fetch(proxyEndpoint, { signal: controller.signal });
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            const res = await fetch(ep, { signal: controller.signal });
             clearTimeout(timeoutId);
             if (res.ok) {
-              const xmlText = await res.text();
-              if (xmlText && (xmlText.includes('<entry>') || xmlText.includes('<published>') || xmlText.includes('<title>'))) {
-                const titleM = xmlText.match(/<title>([^<]+)<\/title>/i);
-                if (titleM && titleM[1] && titleM[1].trim() !== 'YouTube' && !fetchedTitle) {
-                  fetchedTitle = titleM[1].trim();
-                }
-
-                const pubM = xmlText.match(/<published>([^<]+)<\/published>/i) || xmlText.match(/<updated>([^<]+)<\/updated>/i);
-                if (pubM && pubM[1]) {
-                  const rawPub = pubM[1].trim();
-                  const isoM = rawPub.match(/(\d{4})-(\d{2})-(\d{2})/);
-                  if (isoM) {
-                    const dateIso = `${isoM[1]}-${isoM[2]}-${isoM[3]}`;
-                    const formatted = formatDateRuClient(dateIso);
-                    foundDateShort = formatted.short;
-                    foundDateIso = formatted.iso;
-                    break;
-                  }
+              const data = await res.json();
+              if (data.title && !fetchedTitle) fetchedTitle = data.title;
+              if (data.uploadDate) {
+                const parsed = parseDateTextClient(data.uploadDate);
+                if (parsed) {
+                  const formatted = formatDateRuClient(parsed);
+                  foundDateShort = formatted.short;
+                  foundDateIso = formatted.iso;
+                  break;
                 }
               }
             }
@@ -2208,7 +2247,38 @@
         }
       }
 
-      // 2. YouTube oEmbed (Direct CORS, for video title extraction if RSS feed lacked date)
+      // 4. Invidious Public API Endpoints
+      if (ytId && !foundDateShort) {
+        const invidiousEndpoints = [
+          `https://inv.tux.pizza/api/v1/videos/${ytId}`,
+          `https://invidious.drgns.space/api/v1/videos/${ytId}`,
+          `https://invidious.nerdvpn.de/api/v1/videos/${ytId}`
+        ];
+        for (const ep of invidiousEndpoints) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            const res = await fetch(ep, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.title && !fetchedTitle) fetchedTitle = data.title;
+              const rawDate = data.published || data.uploadDate || data.publishedText;
+              if (rawDate) {
+                const parsed = parseDateTextClient(String(rawDate));
+                if (parsed) {
+                  const formatted = formatDateRuClient(parsed);
+                  foundDateShort = formatted.short;
+                  foundDateIso = formatted.iso;
+                  break;
+                }
+              }
+            }
+          } catch (e) {}
+        }
+      }
+
+      // 5. YouTube oEmbed (Title fallback)
       if (ytId && !fetchedTitle) {
         try {
           const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
@@ -2229,11 +2299,11 @@
         } catch (e) {}
       }
 
-      // 2. Attempt backend API route (if running on server environment)
+      // 6. Server API fallback (if running on Node.js server container)
       if (!foundDateShort) {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 1800);
+          const timeoutId = setTimeout(() => controller.abort(), 2000);
           const res = await fetch(`/api/video-info?url=${encodeURIComponent(url.trim())}`, { signal: controller.signal });
           clearTimeout(timeoutId);
           if (res.ok) {
@@ -2247,99 +2317,25 @@
             }
           }
         } catch (e) {}
-      }
-
-      // 3. Client-side fallback for static websites (Invidious / AllOrigins)
-      if (!foundDateShort) {
-        if (ytId) {
-          // 3a. Invidious CORS APIs
-          const invidiousEndpoints = [
-            `https://inv.tux.pizza/api/v1/videos/${ytId}`,
-            `https://invidious.nerdvpn.de/api/v1/videos/${ytId}`,
-            `https://vid.puffyan.us/api/v1/videos/${ytId}`
-          ];
-
-          for (const instUrl of invidiousEndpoints) {
-            try {
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 2000);
-              const res = await fetch(instUrl, { signal: controller.signal });
-              clearTimeout(timeoutId);
-              if (res.ok) {
-                const data = await res.json();
-                if (data.title && !fetchedTitle) fetchedTitle = data.title;
-                let rawDate = data.publishedText || data.uploadDate || data.published;
-                if (data.published && typeof data.published === 'number') {
-                  const d = new Date(data.published * 1000);
-                  rawDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                }
-                const parsed = parseDateTextClient(String(rawDate || ''));
-                if (parsed) {
-                  const formatted = formatDateRuClient(parsed);
-                  foundDateShort = formatted.short;
-                  foundDateIso = formatted.iso;
-                  break;
-                }
-              }
-            } catch (e) {}
-          }
-
-          // 3b. AllOrigins CORS Proxy to parse YouTube HTML
-          if (!foundDateShort) {
-            try {
-              const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.youtube.com/watch?v=' + ytId)}`;
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 3000);
-              const res = await fetch(proxyUrl, { signal: controller.signal });
-              clearTimeout(timeoutId);
-              if (res.ok) {
-                const json = await res.json();
-                const html = json.contents || '';
-                const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-                if (titleMatch && !fetchedTitle) {
-                  fetchedTitle = titleMatch[1].replace(/- YouTube$/i, '').trim();
-                }
-                const candidates = [];
-                const metaUpload = html.match(/itemprop="uploadDate"\s+content="([^"]+)"/i);
-                if (metaUpload) candidates.push(metaUpload[1]);
-                const metaPub = html.match(/itemprop="datePublished"\s+content="([^"]+)"/i);
-                if (metaPub) candidates.push(metaPub[1]);
-                const jsonUpload = html.match(/"uploadDate"\s*:\s*"([^"]+)"/i);
-                if (jsonUpload) candidates.push(jsonUpload[1]);
-                const dateTextM = html.match(/"dateText"\s*:\s*\{\s*"simpleText"\s*:\s*"([^"]+)"\s*\}/i);
-                if (dateTextM) candidates.push(dateTextM[1]);
-
-                for (const cand of candidates) {
-                  const parsed = parseDateTextClient(cand);
-                  if (parsed) {
-                    const formatted = formatDateRuClient(parsed);
-                    foundDateShort = formatted.short;
-                    foundDateIso = formatted.iso;
-                    break;
-                  }
-                }
-              }
-            } catch (e) {}
-          }
-        } else if (url.includes('vk.com') || url.includes('vkvideo.ru')) {
-          try {
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url.trim())}`;
-            const res = await fetch(proxyUrl);
-            if (res.ok) {
-              const json = await res.json();
-              const html = json.contents || '';
-              const candMatch = html.match(/itemprop="uploadDate"\s+content="([^"]+)"/i) || html.match(/"uploadDate"\s*:\s*"([^"]+)"/i) || html.match(/\b(20\d\d-[01]\d-[03]\d)\b/);
-              if (candMatch) {
-                const parsed = parseDateTextClient(candMatch[1]);
-                if (parsed) {
-                  const formatted = formatDateRuClient(parsed);
-                  foundDateShort = formatted.short;
-                  foundDateIso = formatted.iso;
-                }
+      // 7. VK Video / VK.com fallback
+      if (!foundDateShort && (url.includes('vk.com') || url.includes('vkvideo.ru'))) {
+        try {
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url.trim())}`;
+          const res = await fetch(proxyUrl);
+          if (res.ok) {
+            const json = await res.json();
+            const html = json.contents || '';
+            const candMatch = html.match(/itemprop="uploadDate"\s+content="([^"]+)"/i) || html.match(/"uploadDate"\s*:\s*"([^"]+)"/i) || html.match(/\b(20\d\d-[01]\d-[03]\d)\b/);
+            if (candMatch) {
+              const parsed = parseDateTextClient(candMatch[1]);
+              if (parsed) {
+                const formatted = formatDateRuClient(parsed);
+                foundDateShort = formatted.short;
+                foundDateIso = formatted.iso;
               }
             }
-          } catch (e) {}
-        }
+          }
+        } catch (e) {}
       }
 
       if (fetchedTitle) {
