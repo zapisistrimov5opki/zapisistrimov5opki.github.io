@@ -206,12 +206,14 @@
       <div class="lg:col-span-7 space-y-6">
 
         <!-- Main Stream & Moments Card -->
-        <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+        <div id="mainStreamCard" class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
           <div class="flex items-center justify-between pb-3 border-b border-slate-800 flex-wrap gap-2">
-            <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2">
-              <i data-lucide="video" class="w-4 h-4 text-amber-400"></i>
-              <span>Основной стрим</span>
-            </h2>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2">
+                <i data-lucide="video" class="w-4 h-4 text-amber-400"></i>
+                <span>Основной стрим</span>
+              </h2>
+            </div>
             <div class="flex items-center space-x-1.5 flex-wrap gap-1">
               <button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка рассказывает истории 00:00'">
                 <i data-lucide="plus" class="w-3 h-3"></i>
@@ -225,70 +227,84 @@
                 <i data-lucide="plus" class="w-3 h-3"></i>
                 <span>Реакция</span>
               </button>
+              <button onclick="toggleWindowMinimize('mainStreamCard')" class="w-7 h-7 flex items-center justify-center rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer ml-1" title="Свернуть / Развернуть окно" id="btn-minimize-mainStreamCard">
+                <i data-lucide="chevron-up" class="w-4 h-4 transition-transform duration-200"></i>
+              </button>
             </div>
           </div>
 
-          <!-- Main Stream Meta Inputs -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-950/40 p-3.5 rounded-xl border border-slate-800/60">
-            <!-- 1. Video Link Input -->
-            <div>
-              <div class="flex items-center justify-between h-5 mb-1">
-                <label class="block text-xs font-medium text-slate-400">Ссылка</label>
-                <div id="platformBadge" class="flex items-center"></div>
+          <div id="mainStreamCard-body" class="space-y-5 transition-all duration-200">
+            <!-- Main Stream Meta Inputs -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-950/40 p-3.5 rounded-xl border border-slate-800/60">
+              <!-- 1. Video Link Input -->
+              <div>
+                <div class="flex items-center justify-between h-5 mb-1">
+                  <label class="block text-xs font-medium text-slate-400">Ссылка</label>
+                  <div id="platformBadge" class="flex items-center"></div>
+                </div>
+                <input type="text" id="videoId" placeholder="https://youtu.be/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
               </div>
-              <input type="text" id="videoId" placeholder="https://youtu.be/..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+
+              <!-- 2. Block Title Input -->
+              <div>
+                <div class="flex items-center justify-between h-5 mb-1">
+                  <label class="block text-xs font-medium text-slate-400">Заголовок блока</label>
+                </div>
+                <input type="text" id="mainTitle" value="Основной" placeholder="Основной" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+              </div>
+
+              <!-- 3. Stream Date Field -->
+              <div>
+                <div class="flex items-center justify-between h-5 mb-1">
+                  <label class="block text-xs font-medium text-slate-400">Дата записи</label>
+                </div>
+
+                <div class="relative w-full">
+                  <input type="text" id="streamDate" placeholder="10 июл. 2026" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-8 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+                  <input type="date" id="streamDatePicker" onchange="handleDatePickerChange(this.value)" class="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 w-6 h-6 cursor-pointer z-10" title="Выбрать в календаре">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                </div>
+              </div>
             </div>
 
-            <!-- 2. Block Title Input -->
-            <div>
-              <div class="flex items-center justify-between h-5 mb-1">
-                <label class="block text-xs font-medium text-slate-400">Заголовок блока</label>
-              </div>
-              <input type="text" id="mainTitle" value="Основной" placeholder="Основной" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+            <!-- Main Moments List -->
+            <div id="mainMomentsList" class="space-y-3"></div>
+
+            <!-- Hashtags Input -->
+            <div class="pt-3 border-t border-slate-800/80">
+              <label class="block text-xs font-medium text-slate-400 mb-1">Хэштеги (в конце описания)</label>
+              <input type="text" id="hashtags" placeholder="#FreakLand #стрим #моменты" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+              <div id="autoHashtagsBadges" class="mt-2"></div>
             </div>
-
-            <!-- 3. Stream Date Field -->
-            <div>
-              <div class="flex items-center justify-between h-5 mb-1">
-                <label class="block text-xs font-medium text-slate-400">Дата записи</label>
-              </div>
-
-              <div class="relative w-full">
-                <input type="text" id="streamDate" placeholder="10 июл. 2026" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-8 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
-                <input type="date" id="streamDatePicker" onchange="handleDatePickerChange(this.value)" class="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 w-6 h-6 cursor-pointer z-10" title="Выбрать в календаре">
-                <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-              </div>
-            </div>
-          </div>
-
-          <!-- Main Moments List -->
-          <div id="mainMomentsList" class="space-y-3"></div>
-
-          <!-- Hashtags Input -->
-          <div class="pt-3 border-t border-slate-800/80">
-            <label class="block text-xs font-medium text-slate-400 mb-1">Хэштеги (в конце описания)</label>
-            <input type="text" id="hashtags" placeholder="#FreakLand #стрим #моменты" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
-            <div id="autoHashtagsBadges" class="mt-2"></div>
           </div>
         </div>
 
         <!-- Additional Streams Section -->
-        <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+        <div id="extraStreamsCard" class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
           <div class="flex items-center justify-between pb-3 border-b border-slate-800">
             <div>
-              <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2">
-                <i data-lucide="layers" class="w-4 h-4 text-purple-400"></i>
-                <span>Дополнительные стримы</span>
-              </h2>
+              <div class="flex items-center space-x-2">
+                <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2">
+                  <i data-lucide="layers" class="w-4 h-4 text-purple-400"></i>
+                  <span>Дополнительные стримы</span>
+                </h2>
+              </div>
               <p class="text-[11px] text-slate-500 mt-0.5">Дневные, ночные, игровые потоки и переподрубы</p>
             </div>
-            <button onclick="addExtraStream()" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Добавить стрим</span>
-            </button>
+            <div class="flex items-center space-x-2">
+              <button onclick="addExtraStream()" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Добавить стрим</span>
+              </button>
+              <button onclick="toggleWindowMinimize('extraStreamsCard')" class="w-7 h-7 flex items-center justify-center rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer" title="Свернуть / Развернуть окно" id="btn-minimize-extraStreamsCard">
+                <i data-lucide="chevron-up" class="w-4 h-4 transition-transform duration-200"></i>
+              </button>
+            </div>
           </div>
 
-          <div id="extraStreamsList" class="space-y-6"></div>
+          <div id="extraStreamsCard-body" class="space-y-6 transition-all duration-200">
+            <div id="extraStreamsList" class="space-y-6"></div>
+          </div>
         </div>
 
       </div>
@@ -296,38 +312,94 @@
       <!-- Right Column: Player Preview & Text Output -->
       <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-6 lg:h-fit">
 
-        <!-- Container for all Stream Players (Main + Extra Streams with links) -->
-        <div id="allPlayersContainer" class="space-y-6"></div>
+        <!-- Combined Window: Text Description & Players with Tabs -->
+        <div id="mediaOutputCard" class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <!-- Header with Dynamic Title, Icon Tabs, Stream Filters, and Minimize Button -->
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+            <!-- Card Title & Stream Filters / Badge -->
+            <div class="flex items-center space-x-3 flex-wrap gap-y-1">
+              <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2 shrink-0">
+                <i id="mediaHeaderIcon" data-lucide="file-text" class="w-4 h-4 text-amber-400"></i>
+                <span id="mediaHeaderTitle">Текст описания</span>
+              </h2>
+              <div id="singlePlayerBadge" class="hidden flex items-center"></div>
+              <div id="streamFilterTabs" class="hidden flex items-center space-x-1.5 overflow-x-auto max-w-full custom-scrollbar"></div>
+            </div>
 
-        <!-- Card 2: Formatted Description Text -->
-        <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2">
-              <i data-lucide="file-text" class="w-4 h-4 text-amber-400"></i>
-              <span>Текст описания</span>
-            </h2>
-
+            <!-- Header Actions: Icon Tabs & Minimize Button -->
             <div class="flex items-center space-x-2">
-              <button id="cardImportBtn" onclick="openImportModal()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all cursor-pointer" title="Импортировать текст в форму">
-                <i data-lucide="file-input" class="w-3.5 h-3.5"></i>
-                <span>Импорт</span>
-              </button>
-              <button id="copyBtn" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/10 cursor-pointer">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                <span id="copyBtnText">Скопировать</span>
+              <div class="flex items-center space-x-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
+                <button id="tabBtnOutput" onclick="switchRightTab('output')" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm" title="Текст описания">
+                  <i data-lucide="file-text" class="w-4 h-4 text-amber-400"></i>
+                </button>
+                <button id="tabBtnPlayers" onclick="switchRightTab('players')" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer text-slate-400 hover:text-slate-200 border border-transparent" title="Плеер">
+                  <i data-lucide="play-circle" class="w-4 h-4 text-slate-400"></i>
+                </button>
+              </div>
+
+              <button onclick="toggleWindowMinimize('mediaOutputCard')" class="w-7 h-7 flex items-center justify-center rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer" title="Свернуть / Развернуть окно" id="btn-minimize-mediaOutputCard">
+                <i data-lucide="chevron-up" class="w-4 h-4 transition-transform duration-200"></i>
               </button>
             </div>
           </div>
 
-          <div class="space-y-3">
-            <textarea id="outputArea" readonly rows="12" placeholder="Здесь будет сгенерированный текст таймкодов..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 focus:outline-none resize-none leading-relaxed select-all placeholder-slate-700"></textarea>
+          <!-- Window Body -->
+          <div id="mediaOutputCard-body" class="transition-all duration-200">
+            <!-- Tab 1: Formatted Description Text Output (Active First) -->
+            <div id="tabContentOutput" class="space-y-3">
+              <textarea id="outputArea" readonly rows="7" placeholder="Здесь будет сгенерированный текст таймкодов..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-slate-200 focus:outline-none resize-none leading-relaxed select-all placeholder-slate-700 custom-scrollbar"></textarea>
 
-            <div class="flex items-center justify-between text-xs text-slate-500 px-1">
-              <span>Символов: <strong id="charCount" class="text-slate-300">0</strong></span>
-              <a id="externalOpenLink" href="#" target="_blank" rel="noreferrer" class="hidden inline-flex items-center space-x-1 text-amber-400/80 hover:text-amber-300 transition-colors">
-                <span id="externalOpenLabel">Открыть</span>
-                <i data-lucide="external-link" class="w-3 h-3"></i>
-              </a>
+              <div class="flex items-center justify-between text-xs text-slate-500 px-1 pt-1">
+                <div class="flex items-center space-x-3">
+                  <span>Символов: <strong id="charCount" class="text-slate-300">0</strong></span>
+                  <a id="externalOpenLink" href="#" target="_blank" rel="noreferrer" class="hidden inline-flex items-center space-x-1 text-amber-400/80 hover:text-amber-300 transition-colors">
+                    <span id="externalOpenLabel">Открыть</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                  </a>
+                </div>
+
+                <button id="copyBtn" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/10 cursor-pointer">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  <span id="copyBtnText">Скопировать</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Tab 2: Players (Hidden by default, shown when Player tab clicked) -->
+            <div id="tabContentPlayers" class="hidden space-y-4">
+              <div id="allPlayersContainer" class="space-y-4"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notepad Window (Блокнот заметок под окном с текстом и плеером) -->
+        <div id="notepadCard" class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+            <div class="flex items-center space-x-2">
+              <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2">
+                <i data-lucide="notebook" class="w-4 h-4 text-amber-400"></i>
+                <span>Блокнот заметок</span>
+              </h2>
+            </div>
+
+            <div class="flex items-center space-x-1.5">
+              <button onclick="copyNotepadText()" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Скопировать заметки">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">Копия</span>
+              </button>
+              <button onclick="clearNotepadText()" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-slate-800 hover:bg-red-950/40 text-slate-400 hover:text-red-300 border border-slate-700 hover:border-red-800/50 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Очистить блокнот">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="toggleWindowMinimize('notepadCard')" class="w-7 h-7 flex items-center justify-center rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer" title="Свернуть / Развернуть окно" id="btn-minimize-notepadCard">
+                <i data-lucide="chevron-up" class="w-4 h-4 transition-transform duration-200"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="notepadCard-body" class="space-y-3 transition-all duration-200">
+            <textarea id="notepadInput" rows="4" placeholder="Ваши быстрые заметки, черновик, мысли..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500 leading-relaxed resize-y custom-scrollbar"></textarea>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
+              <span>Символов: <strong id="notepadCharCount" class="text-slate-300">0</strong> | Слов: <strong id="notepadWordCount" class="text-slate-300">0</strong></span>
             </div>
           </div>
         </div>
@@ -1682,48 +1754,81 @@
         }
       }
 
-      // 1. Filter Tabs Header (only if validExtraStreams.length > 0)
+      // 1. Single Player Badge vs Stream Filter Tabs Header in Card Header
+      const singlePlayerBadge = document.getElementById('singlePlayerBadge');
+      const streamFilterTabs = document.getElementById('streamFilterTabs');
       let tabsHeaderEl = document.getElementById('playerTabsHeader');
-      if (validExtraStreams.length > 0) {
-        if (!tabsHeaderEl) {
-          tabsHeaderEl = document.createElement('div');
-          tabsHeaderEl.id = 'playerTabsHeader';
-          tabsHeaderEl.className = 'flex items-center justify-between bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3 shadow-xl gap-2 flex-wrap mb-4';
-          container.prepend(tabsHeaderEl);
+      if (tabsHeaderEl) tabsHeaderEl.remove();
+
+      if (activeRightTab === 'players') {
+        if (totalPlayersCount === 1) {
+          if (streamFilterTabs) {
+            streamFilterTabs.classList.add('hidden');
+            streamFilterTabs.innerHTML = '';
+          }
+          if (singlePlayerBadge) {
+            const singleStream = streamsToRender[0] || mainStream;
+            const seekSecs = state.activeSeekTimes[singleStream.id] !== undefined ? state.activeSeekTimes[singleStream.id] : null;
+            const embedInfo = getEmbedInfo(singleStream.url, seekSecs);
+            if (embedInfo) {
+              const badgeColor = embedInfo.platform.includes('YouTube') ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                 embedInfo.platform.includes('Twitch') ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
+                                 embedInfo.platform.includes('VK') ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' :
+                                 embedInfo.platform.includes('Kick') ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+              const badgeHtml = `<span class="text-[10px] font-mono font-semibold ${badgeColor} border px-2 py-0.5 rounded-md">${embedInfo.platform}</span>`;
+              if (singlePlayerBadge.innerHTML !== badgeHtml) {
+                singlePlayerBadge.innerHTML = badgeHtml;
+              }
+              singlePlayerBadge.classList.remove('hidden');
+            } else {
+              singlePlayerBadge.innerHTML = '';
+              singlePlayerBadge.classList.add('hidden');
+            }
+          }
+        } else {
+          // Multiple players: show filter tabs next to "Плеер", hide single badge
+          if (singlePlayerBadge) {
+            singlePlayerBadge.innerHTML = '';
+            singlePlayerBadge.classList.add('hidden');
+          }
+          if (streamFilterTabs) {
+            streamFilterTabs.classList.remove('hidden');
+            let tabsBtnsHtml = `
+              <button onclick="switchPlayerFilter('all')" class="px-2.5 py-0.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${state.activePlayerStreamId === 'all' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 shadow-sm' : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800'}">
+                Все (${totalPlayersCount})
+              </button>
+              <button onclick="switchPlayerFilter('main')" class="px-2.5 py-0.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${state.activePlayerStreamId === 'main' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 shadow-sm' : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800'}">
+                ${escapeHtml(mainStream.title)}
+              </button>
+            `;
+
+            validExtraStreams.forEach(st => {
+              const isActive = state.activePlayerStreamId === st.id;
+              const activeStyle = isActive
+                ? 'bg-purple-500/20 text-purple-300 border-purple-500/30 shadow-sm'
+                : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800';
+              tabsBtnsHtml += `
+                <button onclick="switchPlayerFilter('${st.id}')" class="px-2.5 py-0.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${activeStyle}">
+                  ${escapeHtml(st.title)}
+                </button>
+              `;
+            });
+
+            if (streamFilterTabs.innerHTML !== tabsBtnsHtml) {
+              streamFilterTabs.innerHTML = tabsBtnsHtml;
+            }
+          }
         }
-
-        let tabsBtnsHtml = `
-          <div class="flex items-center space-x-2 text-xs font-semibold text-slate-300">
-            <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
-            <span>Плееры (${totalPlayersCount}):</span>
-          </div>
-          <div class="flex items-center space-x-1.5 overflow-x-auto max-w-full py-0.5 custom-scrollbar">
-            <button onclick="switchPlayerFilter('all')" class="px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${state.activePlayerStreamId === 'all' ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-sm' : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800'}">
-              Все (${totalPlayersCount})
-            </button>
-            <button onclick="switchPlayerFilter('main')" class="px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${state.activePlayerStreamId === 'main' ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-sm' : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800'}">
-              ${escapeHtml(mainStream.title)}
-            </button>
-        `;
-
-        validExtraStreams.forEach(st => {
-          const isActive = state.activePlayerStreamId === st.id;
-          const activeStyle = isActive
-            ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
-            : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border-slate-800';
-          tabsBtnsHtml += `
-            <button onclick="switchPlayerFilter('${st.id}')" class="px-3 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap ${activeStyle}">
-              ${escapeHtml(st.title)}
-            </button>
-          `;
-        });
-
-        tabsBtnsHtml += `</div>`;
-        if (tabsHeaderEl.innerHTML !== tabsBtnsHtml) {
-          tabsHeaderEl.innerHTML = tabsBtnsHtml;
+      } else {
+        if (singlePlayerBadge) {
+          singlePlayerBadge.innerHTML = '';
+          singlePlayerBadge.classList.add('hidden');
         }
-      } else if (tabsHeaderEl) {
-        tabsHeaderEl.remove();
+        if (streamFilterTabs) {
+          streamFilterTabs.classList.add('hidden');
+          streamFilterTabs.innerHTML = '';
+        }
       }
 
       // 2. Manage Player Cards
@@ -1744,11 +1849,9 @@
         const embedInfo = getEmbedInfo(stream.url, seekSecs);
         const platform = detectPlatform(stream.url);
 
-        let cardTitle = 'Предпросмотр плеера';
-        if (!stream.isMain) {
-          cardTitle = `Предпросмотр плеера «${escapeHtml(stream.title)}»`;
-        } else if (state.mainTitle.trim() && state.mainTitle.trim() !== 'Основной' && state.mainTitle.trim() !== 'Основной стрим') {
-          cardTitle = `Предпросмотр плеера «${escapeHtml(state.mainTitle.trim())}»`;
+        let cardTitle = stream.isMain ? 'Основной стрим' : (stream.title || 'Дополнительный стрим');
+        if (stream.isMain && state.mainTitle.trim() && state.mainTitle.trim() !== 'Основной' && state.mainTitle.trim() !== 'Основной стрим') {
+          cardTitle = state.mainTitle.trim();
         }
 
         let cardEl = document.getElementById(`player-card-${stream.id}`);
@@ -1756,12 +1859,14 @@
           cardEl = document.createElement('div');
           cardEl.id = `player-card-${stream.id}`;
           cardEl.setAttribute('data-stream-id', stream.id);
-          cardEl.className = `player-card-item bg-slate-900/90 backdrop-blur-md border ${stream.isMain ? 'border-slate-800' : 'border-purple-500/30'} rounded-2xl p-3 sm:p-5 shadow-2xl space-y-4 mb-6`;
+          cardEl.className = 'player-card-item space-y-3 w-full pb-2';
           cardEl.innerHTML = `
             <div class="player-header-slot"></div>
-            <div class="player-embed-slot"></div>
-            <div class="player-controls-slot"></div>
-            <div class="player-moments-slot"></div>
+            <div id="player-card-${stream.id}-body" class="space-y-3 transition-all duration-200">
+              <div class="player-embed-slot"></div>
+              <div class="player-controls-slot"></div>
+              <div class="player-moments-slot"></div>
+            </div>
           `;
           container.appendChild(cardEl);
         }
@@ -1787,22 +1892,36 @@
           `;
         }
 
-        const headerKey = `${cardTitle}_${embedInfo ? embedInfo.platform : ''}`;
+        const headerKey = `${totalPlayersCount}_${cardTitle}_${embedInfo ? embedInfo.platform : ''}`;
         const headerSlot = cardEl.querySelector('.player-header-slot');
         if (headerSlot && headerSlot.getAttribute('data-header-key') !== headerKey) {
           headerSlot.setAttribute('data-header-key', headerKey);
-          headerSlot.innerHTML = `
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
-              <h2 class="text-sm font-semibold text-slate-200 flex items-center space-x-2 min-w-0">
-                <i data-lucide="play-circle" class="w-4 h-4 ${stream.isMain ? 'text-amber-400' : 'text-purple-400'} shrink-0"></i>
-                <span class="truncate">${cardTitle}</span>
-              </h2>
-              <div class="flex items-center space-x-2">
-                ${extraHeaderAction}
-                ${platformBadge}
+          if (totalPlayersCount === 1) {
+            if (extraHeaderAction) {
+              headerSlot.innerHTML = `
+                <div class="flex items-center justify-end text-xs text-slate-400 pb-1 flex-wrap gap-2">
+                  <div class="flex items-center space-x-2">
+                    ${extraHeaderAction}
+                  </div>
+                </div>
+              `;
+            } else {
+              headerSlot.innerHTML = '';
+            }
+          } else {
+            headerSlot.innerHTML = `
+              <div class="flex items-center justify-between text-xs text-slate-400 pb-1 flex-wrap gap-2">
+                <span class="font-semibold text-slate-200 flex items-center space-x-1.5 truncate">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5 ${stream.isMain ? 'text-amber-400' : 'text-purple-400'} shrink-0"></i>
+                  <span class="truncate">${escapeHtml(cardTitle)}</span>
+                </span>
+                <div class="flex items-center space-x-2">
+                  ${extraHeaderAction}
+                  ${platformBadge}
+                </div>
               </div>
-            </div>
-          `;
+            `;
+          }
         }
 
         // Embed Slot Update
@@ -2003,6 +2122,8 @@
         if (momentsSlot && momentsSlot.innerHTML !== momentsHtml) {
           momentsSlot.innerHTML = momentsHtml;
         }
+
+        applyWindowMinimizeState(`player-card-${stream.id}`);
       });
 
       lucide.createIcons();
@@ -2968,6 +3089,210 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
       showToast('Запись и моменты успешно импортированы!');
     }
 
+    // --- Notepad (Блокнот заметок) ---
+    function setCookie(name, value, days = 365) {
+      try {
+        const d = new Date();
+        d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + d.toUTCString();
+        document.cookie = name + "=" + encodeURIComponent(value || "") + ";" + expires + ";path=/;SameSite=Lax";
+      } catch(e) {}
+    }
+
+    function getCookie(name) {
+      try {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i].trim();
+          if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length));
+        }
+      } catch(e) {}
+      return null;
+    }
+
+    function loadNotepadContent() {
+      const fromLS = localStorage.getItem('notepad_content');
+      const fromCookie = getCookie('notepad_content');
+      if (fromLS !== null && fromLS !== undefined && fromLS !== '') return fromLS;
+      if (fromCookie !== null && fromCookie !== undefined && fromCookie !== '') return fromCookie;
+      return '';
+    }
+
+    function saveNotepadContent(val) {
+      try {
+        localStorage.setItem('notepad_content', val);
+      } catch(e) {}
+      setCookie('notepad_content', val, 365);
+      updateNotepadStats();
+    }
+
+    function loadNotepadHeight() {
+      try {
+        const fromLS = localStorage.getItem('notepad_height');
+        const fromCookie = getCookie('notepad_height');
+        if (fromLS) return fromLS;
+        if (fromCookie) return fromCookie;
+      } catch(e) {}
+      return null;
+    }
+
+    function saveNotepadHeight(height) {
+      if (!height) return;
+      try {
+        localStorage.setItem('notepad_height', height);
+      } catch(e) {}
+      setCookie('notepad_height', height, 365);
+    }
+
+    function updateNotepadStats() {
+      const input = document.getElementById('notepadInput');
+      if (!input) return;
+      const val = input.value || '';
+      const charCount = val.length;
+      const wordCount = val.trim() ? val.trim().split(/\s+/).length : 0;
+      
+      const charEl = document.getElementById('notepadCharCount');
+      const wordEl = document.getElementById('notepadWordCount');
+      if (charEl) charEl.textContent = charCount;
+      if (wordEl) wordEl.textContent = wordCount;
+    }
+
+    function copyNotepadText() {
+      const input = document.getElementById('notepadInput');
+      if (!input) return;
+      if (!input.value.trim()) {
+        showToast('Блокнот пуст');
+        return;
+      }
+      navigator.clipboard.writeText(input.value).then(() => {
+        showToast('Заметки скопированы!');
+      }).catch(() => {
+        input.select();
+        document.execCommand('copy');
+        showToast('Заметки скопированы!');
+      });
+    }
+
+    function clearNotepadText() {
+      const input = document.getElementById('notepadInput');
+      if (!input) return;
+      if (!input.value) return;
+      input.value = '';
+      saveNotepadContent('');
+      showToast('Блокнот очищен');
+    }
+
+    // --- Right Tab Switching Engine ---
+    let activeRightTab = 'output';
+
+    function switchRightTab(tabName) {
+      activeRightTab = tabName;
+      const btnPlayers = document.getElementById('tabBtnPlayers');
+      const btnOutput = document.getElementById('tabBtnOutput');
+      const contentPlayers = document.getElementById('tabContentPlayers');
+      const contentOutput = document.getElementById('tabContentOutput');
+      const headerTitle = document.getElementById('mediaHeaderTitle');
+      const headerIcon = document.getElementById('mediaHeaderIcon');
+
+      if (!btnPlayers || !btnOutput || !contentPlayers || !contentOutput) return;
+
+      const activeBtnClass = 'w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm';
+      const inactiveBtnClass = 'w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer text-slate-400 hover:text-slate-200 border border-transparent';
+
+      if (tabName === 'players') {
+        contentPlayers.classList.remove('hidden');
+        contentOutput.classList.add('hidden');
+
+        btnPlayers.className = activeBtnClass;
+        btnOutput.className = inactiveBtnClass;
+
+        if (headerTitle) headerTitle.textContent = 'Плеер';
+        if (headerIcon) headerIcon.setAttribute('data-lucide', 'play-circle');
+
+        updatePlayerTab();
+      } else if (tabName === 'output') {
+        contentOutput.classList.remove('hidden');
+        contentPlayers.classList.add('hidden');
+
+        btnOutput.className = activeBtnClass;
+        btnPlayers.className = inactiveBtnClass;
+
+        if (headerTitle) headerTitle.textContent = 'Текст описания';
+        if (headerIcon) headerIcon.setAttribute('data-lucide', 'file-text');
+
+        const streamFilterTabs = document.getElementById('streamFilterTabs');
+        if (streamFilterTabs) {
+          streamFilterTabs.classList.add('hidden');
+        }
+        const singlePlayerBadge = document.getElementById('singlePlayerBadge');
+        if (singlePlayerBadge) {
+          singlePlayerBadge.classList.add('hidden');
+        }
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // --- Window Minimization Engine ---
+    let minimizedWindows = {};
+    try {
+      const savedLS = localStorage.getItem('minimized_windows');
+      const savedCookie = getCookie('minimized_windows');
+      const saved = savedLS || savedCookie;
+      if (saved) minimizedWindows = JSON.parse(saved);
+    } catch(e) {}
+
+    function toggleWindowMinimize(windowId) {
+      minimizedWindows[windowId] = !minimizedWindows[windowId];
+      const jsonStr = JSON.stringify(minimizedWindows);
+      try {
+        localStorage.setItem('minimized_windows', jsonStr);
+      } catch(e) {}
+      setCookie('minimized_windows', jsonStr, 365);
+      applyWindowMinimizeState(windowId);
+    }
+
+    function applyWindowMinimizeState(windowId) {
+      const cardEl = document.getElementById(windowId);
+      if (!cardEl) return;
+      const isMinimized = !!minimizedWindows[windowId];
+      const bodyEl = document.getElementById(windowId + '-body');
+      const btnEl = document.getElementById('btn-minimize-' + windowId);
+
+      if (bodyEl) {
+        if (isMinimized) {
+          bodyEl.classList.add('hidden');
+        } else {
+          bodyEl.classList.remove('hidden');
+        }
+      }
+
+      if (btnEl) {
+        btnEl.innerHTML = isMinimized
+          ? `<i data-lucide="chevron-down" class="w-4 h-4 text-amber-400"></i>`
+          : `<i data-lucide="chevron-up" class="w-4 h-4"></i>`;
+        btnEl.title = isMinimized ? 'Развернуть окно' : 'Свернуть окно';
+      }
+
+      const badgeEl = document.getElementById('min-badge-' + windowId);
+      if (badgeEl) {
+        if (isMinimized) {
+          badgeEl.classList.remove('hidden');
+        } else {
+          badgeEl.classList.add('hidden');
+        }
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function initAllWindowMinimizeStates() {
+      ['mainStreamCard', 'extraStreamsCard', 'notepadCard', 'mediaOutputCard'].forEach(id => {
+        applyWindowMinimizeState(id);
+      });
+    }
+
     // --- Init & Event Binding ---
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -3100,6 +3425,43 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
         }
       });
 
+      // Initialize Notepad Input
+      const notepadEl = document.getElementById('notepadInput');
+      if (notepadEl) {
+        notepadEl.value = loadNotepadContent();
+        updateNotepadStats();
+
+        const savedHeight = loadNotepadHeight();
+        if (savedHeight) {
+          notepadEl.style.height = savedHeight;
+        }
+
+        notepadEl.addEventListener('input', (e) => saveNotepadContent(e.target.value));
+        notepadEl.addEventListener('change', (e) => saveNotepadContent(e.target.value));
+
+        if (window.ResizeObserver) {
+          const ro = new ResizeObserver(entries => {
+            for (let entry of entries) {
+              const h = entry.target.style.height;
+              if (h) {
+                saveNotepadHeight(h);
+              }
+            }
+          });
+          ro.observe(notepadEl);
+        } else {
+          notepadEl.addEventListener('mouseup', () => {
+            if (notepadEl.style.height) saveNotepadHeight(notepadEl.style.height);
+          });
+          notepadEl.addEventListener('touchend', () => {
+            if (notepadEl.style.height) saveNotepadHeight(notepadEl.style.height);
+          });
+        }
+      }
+
+      // Initialize Window Minimization States
+      initAllWindowMinimizeStates();
+
       // Render initial clean view
       renderMainMoments();
       renderExtraStreams();
@@ -3123,7 +3485,6 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
       let isSleeping = false;
       let sleepTimeout = null;
       let clickCount = 0;
-      let autoSecondsCount = 0;
 
       function updateCatPosition() {
         if (!isPaused && !isSleeping) {
@@ -3187,7 +3548,6 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
         if (!cat || isSuperJumping || isSleeping) return;
         isSuperJumping = true;
         clickCount = 0;
-        autoSecondsCount = 0;
         cat.classList.add('cat-super-jumping');
         setTimeout(() => {
           cat.classList.remove('cat-super-jumping');
@@ -3224,20 +3584,12 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
       }
 
       // Ticker interval running every second:
-      // 1. 0.01 (1%) chance per second for cat to fall asleep for 5-30 sec
-      // 2. Incremental full-page super jump: starts at 0.0001 (+0.0001/sec), guaranteed on 10,000th second
+      // 0.01 (1%) chance per second for cat to fall asleep for 5-30 sec
       setInterval(() => {
         if (isSleeping || isSuperJumping) return;
 
         if (Math.random() < 0.01) {
           startSleeping();
-          return;
-        }
-
-        autoSecondsCount++;
-        const autoChance = autoSecondsCount * 0.0001;
-        if (Math.random() < autoChance) {
-          triggerSuperJump();
         }
       }, 1000);
 
