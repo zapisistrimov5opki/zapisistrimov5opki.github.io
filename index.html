@@ -2104,13 +2104,14 @@
 
     function parseDateTextClient(str) {
       if (!str) return null;
+      const s = String(str).trim();
 
       // 1. ISO YYYY-MM-DD
-      const isoMatch = str.match(/(20\d\d)-([01]\d)-([03]\d)/);
+      const isoMatch = s.match(/(20\d\d)-([01]\d)-([0-3]\d)/);
       if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
 
       // 2. DD.MM.YYYY
-      const dotMatch = str.match(/([0-3]?\d)\.([01]?\d)\.(20\d\d)/);
+      const dotMatch = s.match(/([0-3]?\d)\.([01]?\d)\.(20\d\d)/);
       if (dotMatch) {
         const day = dotMatch[1].padStart(2, '0');
         const month = dotMatch[2].padStart(2, '0');
@@ -2118,7 +2119,7 @@
       }
 
       // 3. Russian date e.g. "28 февр. 2019" or "28 февраля 2019"
-      const ruMatch = str.match(/([0-3]?\d)\s+([а-яяА-Я]+)\.?\s+(20\d\d)/i);
+      const ruMatch = s.match(/([0-3]?\d)\s+([а-яяА-Я]+)\.?\s+(20\d\d)/i);
       if (ruMatch) {
         const day = ruMatch[1].padStart(2, '0');
         const mStr = ruMatch[2].toLowerCase().trim().replace('.', '');
@@ -2128,6 +2129,19 @@
           return `${ruMatch[3]}-${month}-${day}`;
         }
       }
+
+      // 4. Standard Date parsing (RSS pubDate "Fri, 25 Jun 2021 18:00:15 GMT" or ISO strings)
+      try {
+        const d = new Date(s);
+        if (!isNaN(d.getTime())) {
+          const y = d.getFullYear();
+          if (y >= 2010 && y <= 2035) {
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+          }
+        }
+      } catch (e) {}
 
       return null;
     }
@@ -2162,11 +2176,16 @@
       let foundDateShort = null;
       let foundDateIso = null;
       let fetchedTitle = null;
+      const diagErrors = [];
 
       const ytId = extractVideoId(url.trim());
 
+      if (!ytId && !url.includes('vk.com') && !url.includes('vkvideo.ru')) {
+        diagErrors.push('ERR_NO_VIDEO_ID');
+      }
+
       // 1. YouTube RSS Feed via rss2json API (Direct JSON, fastest & CORS-friendly for static sites)
-      if (ytId) {
+      if (ytId && !foundDateShort) {
         try {
           const rssUrl = `https://www.youtube.com/feeds/videos.xml?video_id=${ytId}`;
           const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
@@ -2182,11 +2201,21 @@
                   const formatted = formatDateRuClient(parsed);
                   foundDateShort = formatted.short;
                   foundDateIso = formatted.iso;
+                } else {
+                  diagErrors.push(`E1_PARSE_FAIL(${rawDate})`);
                 }
+              } else {
+                diagErrors.push('E1_NO_PUBDATE');
               }
+            } else {
+              diagErrors.push(`E1_RSS_STATUS_${data ? data.status : 'ERR'}`);
             }
+          } else {
+            diagErrors.push(`E1_HTTP_${res.status}`);
           }
-        } catch (e) {}
+        } catch (e) {
+          diagErrors.push('E1_FETCH_ERR');
+        }
       }
 
       // 2. YouTube RSS XML via AllOrigins JSON Proxy
@@ -2210,11 +2239,21 @@
                   const formatted = formatDateRuClient(parsed);
                   foundDateShort = formatted.short;
                   foundDateIso = formatted.iso;
+                } else {
+                  diagErrors.push(`E2_PARSE_FAIL(${pubM[1].trim()})`);
                 }
+              } else {
+                diagErrors.push('E2_NO_XML_PUB');
               }
+            } else {
+              diagErrors.push('E2_EMPTY_PROXY_RES');
             }
+          } else {
+            diagErrors.push(`E2_HTTP_${res.status}`);
           }
-        } catch (e) {}
+        } catch (e) {
+          diagErrors.push('E2_FETCH_ERR');
+        }
       }
 
       // 3. Piped Public API Endpoints
@@ -2245,6 +2284,7 @@
             }
           } catch (e) {}
         }
+        if (!foundDateShort) diagErrors.push('E3_PIPED_FAIL');
       }
 
       // 4. Invidious Public API Endpoints
@@ -2276,6 +2316,7 @@
             }
           } catch (e) {}
         }
+        if (!foundDateShort) diagErrors.push('E4_INVIDIOUS_FAIL');
       }
 
       // 5. YouTube oEmbed (Title fallback)
@@ -2295,8 +2336,12 @@
                 }
               }
             }
+          } else {
+            diagErrors.push(`E5_OEMBED_HTTP_${res.status}`);
           }
-        } catch (e) {}
+        } catch (e) {
+          diagErrors.push('E5_OEMBED_ERR');
+        }
       }
 
       // 6. Server API fallback (if running on Node.js server container)
@@ -2314,9 +2359,17 @@
                 foundDateShort = data.dateFormattedShort || data.dateFormatted;
                 foundDateIso = data.dateIso;
               }
+            } else {
+              diagErrors.push('E6_STATIC_404');
             }
+          } else {
+            diagErrors.push(`E6_HTTP_${res.status}`);
           }
-        } catch (e) {}
+        } catch (e) {
+          diagErrors.push('E6_STATIC_HOST');
+        }
+      }
+
       // 7. VK Video / VK.com fallback
       if (!foundDateShort && (url.includes('vk.com') || url.includes('vkvideo.ru'))) {
         try {
@@ -2325,7 +2378,7 @@
           if (res.ok) {
             const json = await res.json();
             const html = json.contents || '';
-            const candMatch = html.match(/itemprop="uploadDate"\s+content="([^"]+)"/i) || html.match(/"uploadDate"\s*:\s*"([^"]+)"/i) || html.match(/\b(20\d\d-[01]\d-[03]\d)\b/);
+            const candMatch = html.match(/itemprop="uploadDate"\s+content="([^"]+)"/i) || html.match(/"uploadDate"\s*:\s*"([^"]+)"/i) || html.match(/\b(20\d\d-[01]\d-[0-3]\d)\b/);
             if (candMatch) {
               const parsed = parseDateTextClient(candMatch[1]);
               if (parsed) {
@@ -2335,7 +2388,9 @@
               }
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          diagErrors.push('E7_VK_FAIL');
+        }
       }
 
       if (fetchedTitle) {
@@ -2356,7 +2411,12 @@
         showToast(`Дата из видео подтянута: ${foundDateShort}`);
       } else {
         updateOutput();
-        if (!isAuto) showToast(fetchedTitle ? `Информация о видео загружена` : 'Не удалось извлечь дату из видео');
+        const errDetails = diagErrors.length > 0 ? ` [Коды: ${diagErrors.slice(0, 3).join(', ')}]` : '';
+        if (!isAuto) {
+          showToast(fetchedTitle ? `Информация загружена, дата не найдена${errDetails}` : `Не удалось извлечь дату${errDetails}`);
+        } else {
+          showToast(`Дата не извлечена${errDetails}`);
+        }
       }
 
       if (btn) {
