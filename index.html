@@ -2160,7 +2160,7 @@
       return { short: isoStr, iso: isoStr };
     }
 
-    function fetchWithTimeout(resource, timeoutMs = 3000) {
+    function fetchWithTimeout(resource, timeoutMs = 7000) {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), timeoutMs);
       return fetch(resource, { signal: controller.signal })
@@ -2170,6 +2170,12 @@
         })
         .catch(err => {
           clearTimeout(id);
+          if (err && err.name === 'AbortError') {
+            throw new Error('TIMEOUT');
+          }
+          if (err && (err.message === 'Failed to fetch' || err.name === 'TypeError')) {
+            throw new Error('CORS_NET_ERR');
+          }
           throw err;
         });
     }
@@ -2191,6 +2197,36 @@
       const m = xmlText.match(/<title>([^<]+)<\/title>/i);
       if (m && m[1] && m[1].trim() !== 'YouTube') {
         return m[1].trim();
+      }
+      return null;
+    }
+
+    function extractDateFromYoutubeHtml(htmlText) {
+      if (!htmlText) return null;
+      const candidates = [];
+      const m1 = htmlText.match(/itemprop="uploadDate"\s+content="([^"]+)"/i);
+      if (m1) candidates.push(m1[1]);
+      const m2 = htmlText.match(/itemprop="datePublished"\s+content="([^"]+)"/i);
+      if (m2) candidates.push(m2[1]);
+      const m3 = htmlText.match(/"uploadDate"\s*:\s*"([^"]+)"/i);
+      if (m3) candidates.push(m3[1]);
+      const m4 = htmlText.match(/"publishDate"\s*:\s*"([^"]+)"/i);
+      if (m4) candidates.push(m4[1]);
+      const m5 = htmlText.match(/"dateText"\s*:\s*\{\s*"simpleText"\s*:\s*"([^"]+)"\s*\}/i);
+      if (m5) candidates.push(m5[1]);
+
+      for (const cand of candidates) {
+        const parsed = parseDateTextClient(cand);
+        if (parsed) return parsed;
+      }
+      return null;
+    }
+
+    function extractTitleFromYoutubeHtml(htmlText) {
+      if (!htmlText) return null;
+      const titleMatch = htmlText.match(/<title>(.*?)<\/title>/i);
+      if (titleMatch && titleMatch[1]) {
+        return titleMatch[1].replace(/- YouTube$/i, '').trim();
       }
       return null;
     }
@@ -2242,11 +2278,48 @@
 
       if (ytId) {
         const rssUrl = `https://www.youtube.com/feeds/videos.xml?video_id=${ytId}`;
+        const watchUrl = `https://www.youtube.com/watch?v=${ytId}`;
 
         const providers = [
-          // 1. CodeTabs RSS Proxy
+          // 1. RSS via rss2json API
           async () => {
-            const res = await fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`, 3000);
+            const res = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`, 6000);
+            if (!res.ok) throw new Error(`RSS2JSON_${res.status}`);
+            const data = await res.json();
+            if (data && data.status === 'ok' && data.items && data.items.length > 0) {
+              const item = data.items[0];
+              const date = item.pubDate || item.created ? parseDateTextClient(item.pubDate || item.created) : null;
+              const title = item.title;
+              if (!date && !title) throw new Error('RSS2JSON_EMPTY');
+              return { date, title, source: 'RSS2JSON' };
+            }
+            throw new Error('RSS2JSON_NO_DATA');
+          },
+          // 2. AllOrigins RSS Get JSON
+          async () => {
+            const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`, 6000);
+            if (!res.ok) throw new Error(`AllOriginsRSS_${res.status}`);
+            const json = await res.json();
+            const xml = json.contents || '';
+            const date = extractDateFromYoutubeRssXml(xml);
+            const title = extractTitleFromYoutubeRssXml(xml);
+            if (!date && !title) throw new Error('AllOriginsRSS_EMPTY');
+            return { date, title, source: 'AllOriginsRSS' };
+          },
+          // 3. AllOrigins Watch Page HTML JSON
+          async () => {
+            const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(watchUrl)}`, 7000);
+            if (!res.ok) throw new Error(`AllOriginsHTML_${res.status}`);
+            const json = await res.json();
+            const html = json.contents || '';
+            const date = extractDateFromYoutubeHtml(html);
+            const title = extractTitleFromYoutubeHtml(html);
+            if (!date && !title) throw new Error('AllOriginsHTML_EMPTY');
+            return { date, title, source: 'AllOriginsHTML' };
+          },
+          // 4. CodeTabs RSS Proxy
+          async () => {
+            const res = await fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`, 6000);
             if (!res.ok) throw new Error(`CodeTabs_${res.status}`);
             const xml = await res.text();
             const date = extractDateFromYoutubeRssXml(xml);
@@ -2254,80 +2327,29 @@
             if (!date && !title) throw new Error('CodeTabs_EMPTY');
             return { date, title, source: 'CodeTabs' };
           },
-          // 2. CorsProxy.io RSS
+          // 5. Invidious Instance 1 (inv.nadeko.net)
           async () => {
-            const res = await fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(rssUrl)}`, 3000);
-            if (!res.ok) throw new Error(`CorsProxy_${res.status}`);
-            const xml = await res.text();
-            const date = extractDateFromYoutubeRssXml(xml);
-            const title = extractTitleFromYoutubeRssXml(xml);
-            if (!date && !title) throw new Error('CorsProxy_EMPTY');
-            return { date, title, source: 'CorsProxy' };
-          },
-          // 3. AllOrigins Raw RSS
-          async () => {
-            const res = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`, 3000);
-            if (!res.ok) throw new Error(`AllOriginsRaw_${res.status}`);
-            const xml = await res.text();
-            const date = extractDateFromYoutubeRssXml(xml);
-            const title = extractTitleFromYoutubeRssXml(xml);
-            if (!date && !title) throw new Error('AllOriginsRaw_EMPTY');
-            return { date, title, source: 'AllOriginsRaw' };
-          },
-          // 4. AllOrigins Get JSON
-          async () => {
-            const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`, 3000);
-            if (!res.ok) throw new Error(`AllOriginsGet_${res.status}`);
-            const json = await res.json();
-            const xml = json.contents || '';
-            const date = extractDateFromYoutubeRssXml(xml);
-            const title = extractTitleFromYoutubeRssXml(xml);
-            if (!date && !title) throw new Error('AllOriginsGet_EMPTY');
-            return { date, title, source: 'AllOriginsGet' };
-          },
-          // 5. Invidious (yewtu.be)
-          async () => {
-            const res = await fetchWithTimeout(`https://yewtu.be/api/v1/videos/${ytId}`, 3000);
-            if (!res.ok) throw new Error(`YewTube_${res.status}`);
+            const res = await fetchWithTimeout(`https://inv.nadeko.net/api/v1/videos/${ytId}`, 6000);
+            if (!res.ok) throw new Error(`Invidious1_${res.status}`);
             const data = await res.json();
             const date = extractDateFromInvidiousJson(data);
             const title = data.title;
-            if (!date && !title) throw new Error('YewTube_EMPTY');
-            return { date, title, source: 'YewTube' };
+            if (!date && !title) throw new Error('Invidious1_EMPTY');
+            return { date, title, source: 'Invidious1' };
           },
-          // 6. Invidious (privacydev.net)
+          // 6. Invidious Instance 2 (invidious.nerdvpn.de)
           async () => {
-            const res = await fetchWithTimeout(`https://invidious.privacydev.net/api/v1/videos/${ytId}`, 3000);
-            if (!res.ok) throw new Error(`PrivacyDev_${res.status}`);
+            const res = await fetchWithTimeout(`https://invidious.nerdvpn.de/api/v1/videos/${ytId}`, 6000);
+            if (!res.ok) throw new Error(`Invidious2_${res.status}`);
             const data = await res.json();
             const date = extractDateFromInvidiousJson(data);
             const title = data.title;
-            if (!date && !title) throw new Error('PrivacyDev_EMPTY');
-            return { date, title, source: 'PrivacyDev' };
+            if (!date && !title) throw new Error('Invidious2_EMPTY');
+            return { date, title, source: 'Invidious2' };
           },
-          // 7. Invidious (inv.tux.pizza)
+          // 7. YouTube oEmbed (Title + date if in title)
           async () => {
-            const res = await fetchWithTimeout(`https://inv.tux.pizza/api/v1/videos/${ytId}`, 3000);
-            if (!res.ok) throw new Error(`TuxPizza_${res.status}`);
-            const data = await res.json();
-            const date = extractDateFromInvidiousJson(data);
-            const title = data.title;
-            if (!date && !title) throw new Error('TuxPizza_EMPTY');
-            return { date, title, source: 'TuxPizza' };
-          },
-          // 8. Piped (pipedapi.kavin.rocks)
-          async () => {
-            const res = await fetchWithTimeout(`https://pipedapi.kavin.rocks/streams/${ytId}`, 3000);
-            if (!res.ok) throw new Error(`Piped_${res.status}`);
-            const data = await res.json();
-            const date = data.uploadDate ? parseDateTextClient(data.uploadDate) : null;
-            const title = data.title;
-            if (!date && !title) throw new Error('Piped_EMPTY');
-            return { date, title, source: 'Piped' };
-          },
-          // 9. YouTube oEmbed
-          async () => {
-            const res = await fetchWithTimeout(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`, 3000);
+            const res = await fetchWithTimeout(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`, 5000);
             if (!res.ok) throw new Error(`oEmbed_${res.status}`);
             const data = await res.json();
             const title = data.title;
@@ -2335,9 +2357,9 @@
             if (!title) throw new Error('oEmbed_EMPTY');
             return { date, title, source: 'oEmbed' };
           },
-          // 10. Server API (if server container available)
+          // 8. Server API route (if hosted on fullstack Node container)
           async () => {
-            const res = await fetchWithTimeout(`/api/video-info?url=${encodeURIComponent(url.trim())}`, 2000);
+            const res = await fetchWithTimeout(`/api/video-info?url=${encodeURIComponent(url.trim())}`, 3000);
             if (!res.ok) throw new Error(`Server_${res.status}`);
             const data = await res.json();
             if (!data || !data.success) throw new Error('Server_FAIL');
@@ -2357,7 +2379,8 @@
               foundDateIso = formatted.iso;
             }
           } else if (r.status === 'rejected') {
-            diagErrors.push(r.reason?.message || 'ERR');
+            const msg = String(r.reason?.message || 'ERR');
+            if (!diagErrors.includes(msg)) diagErrors.push(msg);
           }
         }
       }
