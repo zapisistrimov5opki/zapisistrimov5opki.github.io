@@ -261,7 +261,6 @@
                 </div>
                 <button type="button" id="fetchDateBtn" onclick="fetchVideoInfoAndApplyDate(state.videoId)" class="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0" title="Подтянуть дату публикации из ссылки на видео">
                   <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                  <span></span>
                 </button>
               </div>
             </div>
@@ -274,6 +273,7 @@
           <div class="pt-3 border-t border-slate-800/80">
             <label class="block text-xs font-medium text-slate-400 mb-1">Хэштеги (в конце описания)</label>
             <input type="text" id="hashtags" placeholder="#FreakLand #стрим #моменты" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+            <div id="autoHashtagsBadges" class="mt-2"></div>
           </div>
         </div>
 
@@ -516,16 +516,16 @@
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200" onclick="handleSettingsModalBackdropClick(event)">
-    <div id="settingsModalBox" class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden transform scale-95 transition-all duration-200 flex flex-col">
+    <div id="settingsModalBox" class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden transform scale-95 transition-all duration-200 flex flex-col max-h-[90vh]">
       <!-- Modal Header -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 shrink-0">
         <div class="flex items-center space-x-2.5">
           <div class="p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
             <i data-lucide="settings" class="w-4 h-4"></i>
           </div>
           <div>
             <h3 class="text-sm font-bold text-slate-100">Настройки приложения</h3>
-            <p class="text-[10px] text-slate-400">Параметры импорта и автоматизации</p>
+            <p class="text-[10px] text-slate-400">Параметры импорта, подбора хэштегов и автоматизации</p>
           </div>
         </div>
         <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer" title="Закрыть (Esc)">
@@ -533,9 +533,9 @@
         </button>
       </div>
 
-      <!-- Modal Content -->
-      <div class="p-6 space-y-4">
-        <!-- Setting Item: Auto import date toggle -->
+      <!-- Modal Content (Scrollable) -->
+      <div class="p-6 space-y-5 overflow-y-auto custom-scrollbar">
+        <!-- Setting Item 1: Auto import date toggle -->
         <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
           <div class="space-y-1">
             <label for="autoImportDateToggle" class="text-xs font-semibold text-slate-200 block cursor-pointer">
@@ -550,10 +550,88 @@
             <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
           </label>
         </div>
+
+        <!-- Setting Item 2: Auto hashtags toggle -->
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <label for="autoHashtagsToggle" class="text-xs font-semibold text-slate-200 block cursor-pointer">
+                Автоматический подбор хэштегов по содержимому
+              </label>
+              <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wider">Beta</span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              Анализировать названия моментов и стримов и автоматически подставлять соответствующий набор хэштегов
+            </p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" id="autoHashtagsToggle" class="sr-only peer" onchange="toggleAutoHashtags(this.checked)">
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+        </div>
+
+        <!-- Setting Item 3: Hashtags Rule Manager -->
+        <div class="space-y-3 pt-2 border-t border-slate-800/80">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h4 class="text-xs font-bold text-slate-200 flex items-center space-x-1.5">
+                <i data-lucide="hash" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Менеджер хэштегов</span>
+                <span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase">BETA</span>
+              </h4>
+              <p class="text-[10px] text-slate-400 mt-0.5">Ключевые слова или синонимы (через запятую) в названиях определяют хэштеги</p>
+            </div>
+            <button onclick="resetHashtagRules()" class="inline-flex items-center space-x-1 px-2.5 py-1 text-[11px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors cursor-pointer" title="Сбросить к исходным правилам">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+              <span>Сбросить к стандартным</span>
+            </button>
+          </div>
+
+          <!-- Add New Rule Form -->
+          <div class="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2">
+            <span class="text-[11px] font-semibold text-amber-400/90 block">Добавить новое правило:</span>
+            <div class="grid grid-cols-1 sm:grid-cols-6 gap-2">
+              <input type="text" id="newRuleKeyword" placeholder="Ключ/синонимы (напр. СП4, СПм)" class="sm:col-span-2 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+              <input type="text" id="newRuleTags" placeholder="Хэштеги (#Майнкрафт #СП4)" class="sm:col-span-2 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+              <select id="newRuleCategory" class="sm:col-span-1 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+                <option value="СП / Майнкрафт">СП / Майнкрафт</option>
+                <option value="Игры" selected>Игры</option>
+                <option value="Аниме">Аниме</option>
+                <option value="Фильмы & Сериалы">Фильмы & Сериалы</option>
+                <option value="События & Шоу">События & Шоу</option>
+                <option value="Другое">Другое</option>
+              </select>
+              <button onclick="addHashtagRule()" class="sm:col-span-1 inline-flex items-center justify-center space-x-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition-all shadow-sm cursor-pointer whitespace-nowrap">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Добавить</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Filter Pills & Search / Sorting Controls -->
+          <div class="space-y-2 pt-1">
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                <input type="text" id="ruleSearchInput" oninput="renderHashtagRulesInSettings()" placeholder="Поиск по ключу или хэштегам..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
+              </div>
+              <select id="ruleSortSelect" onchange="renderHashtagRulesInSettings()" class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-amber-500 shrink-0 cursor-pointer">
+                <option value="alpha">По алфавиту (А-Я)</option>
+                <option value="recent">Сначала новые</option>
+              </select>
+            </div>
+
+            <!-- Category Tabs -->
+            <div id="categoryFilterTabs" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto custom-scrollbar"></div>
+          </div>
+
+          <!-- Rules List Container -->
+          <div id="hashtagRulesList" class="space-y-1.5 max-h-56 overflow-y-auto pr-1 custom-scrollbar"></div>
+        </div>
       </div>
 
       <!-- Modal Footer -->
-      <div class="flex items-center justify-end px-6 py-4 border-t border-slate-800 bg-slate-950/60">
+      <div class="flex items-center justify-end px-6 py-4 border-t border-slate-800 bg-slate-950/60 shrink-0">
         <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/20 cursor-pointer">
           Готово
         </button>
@@ -566,9 +644,213 @@
 
   <!-- Vanilla JS Logic -->
   <script>
-    // --- Initial Clean State ---
+    // --- Initial Clean State & Config ---
+    const HASHTAG_CATEGORIES = [
+      'Все',
+      'СП / Майнкрафт',
+      'Игры',
+      'Аниме',
+      'Фильмы & Сериалы',
+      'События & Шоу',
+      'Другое'
+    ];
+
+    const DEFAULT_HASHTAG_RULES = [
+      // СП / Майнкрафт
+      { keyword: 'Майнкрафт', tags: '#Майнкрафт', category: 'СП / Майнкрафт', addedAt: 100 },
+      { keyword: 'СП1', tags: '#Майнкрафт #СП1', category: 'СП / Майнкрафт', addedAt: 101 },
+      { keyword: 'СП2', tags: '#Майнкрафт #СП2', category: 'СП / Майнкрафт', addedAt: 102 },
+      { keyword: 'СП3', tags: '#Майнкрафт #СП3', category: 'СП / Майнкрафт', addedAt: 103 },
+      { keyword: 'СП4', tags: '#Майнкрафт #СП4', category: 'СП / Майнкрафт', addedAt: 104 },
+      { keyword: 'СП5', tags: '#Майнкрафт #СП5', category: 'СП / Майнкрафт', addedAt: 105 },
+      { keyword: 'СПк', tags: '#Майнкрафт #СПк', category: 'СП / Майнкрафт', addedAt: 106 },
+      { keyword: 'СПmini, СПм', tags: '#Майнкрафт #СПм', category: 'СП / Майнкрафт', addedAt: 107 },
+      { keyword: 'СП Магия, СПМагия', tags: '#Майнкрафт #СПМагия', category: 'СП / Майнкрафт', addedAt: 108 },
+      { keyword: 'гп', tags: '#Майнкрафт #гп', category: 'СП / Майнкрафт', addedAt: 109 },
+      { keyword: 'Алмазная Гонка, АлмазнаяГонка', tags: '#Майнкрафт #АлмазнаяГонка', category: 'СП / Майнкрафт', addedAt: 110 },
+      { keyword: 'Freak Land, FreakLand', tags: '#Майнкрафт #FreakLand', category: 'СП / Майнкрафт', addedAt: 111 },
+      { keyword: 'СП Hytale, СПHytale', tags: '#СПHytale', category: 'СП / Майнкрафт', addedAt: 112 },
+      { keyword: 'Terra Firma Greg, TerraFirmaGreg', tags: '#TerraFirmaGreg', category: 'СП / Майнкрафт', addedAt: 113 },
+
+      // Игры
+      { keyword: 'ARC Raiders, ARCraiders', tags: '#ARCraiders', category: 'Игры', addedAt: 201 },
+      { keyword: 'Among Us 3D, AmongUs3D', tags: '#AmongUs3D', category: 'Игры', addedAt: 202 },
+      { keyword: 'Animal Crossing, AnimalCrossing', tags: '#AnimalCrossing', category: 'Игры', addedAt: 203 },
+      { keyword: 'Astroneer', tags: '#Astroneer', category: 'Игры', addedAt: 204 },
+      { keyword: 'Backseat Drivers, BackseatDrivers', tags: '#BackseatDrivers', category: 'Игры', addedAt: 205 },
+      { keyword: 'Balatro', tags: '#Balatro', category: 'Игры', addedAt: 206 },
+      { keyword: 'Baldur\'s Gate 3, Baldur Gates 3, BG3', tags: '#BG3', category: 'Игры', addedAt: 207 },
+      { keyword: 'Batman: Arkham Knight, BatmanArkhamKnight', tags: '#BatmanArkhamKnight', category: 'Игры', addedAt: 208 },
+      { keyword: 'Bazaar Simulator, BazaarSimulator', tags: '#BazaarSimulator', category: 'Игры', addedAt: 209 },
+      { keyword: 'BeamNG', tags: '#BeamNG', category: 'Игры', addedAt: 210 },
+      { keyword: 'Black Myth: Wukong, BlackMythWukong', tags: '#BlackMythWukong', category: 'Игры', addedAt: 211 },
+      { keyword: 'Brawl Stars, BrawlStars', tags: '#BrawlStars', category: 'Игры', addedAt: 212 },
+      { keyword: 'Бункер', tags: '#Бункер', category: 'Игры', addedAt: 213 },
+      { keyword: 'Cities: Skylines, CitiesSkylines', tags: '#CitiesSkylines', category: 'Игры', addedAt: 214 },
+      { keyword: 'Clash Royale, ClashRoyale', tags: '#ClashRoyale', category: 'Игры', addedAt: 215 },
+      { keyword: 'Content Warning, ContentWarning', tags: '#ContentWarning', category: 'Игры', addedAt: 216 },
+      { keyword: 'Crab Game, CrabGame', tags: '#CrabGame', category: 'Игры', addedAt: 217 },
+      { keyword: 'CS 1.6, CS16', tags: '#CS16', category: 'Игры', addedAt: 218 },
+      { keyword: 'CS 2, CS2', tags: '#CS2', category: 'Игры', addedAt: 219 },
+      { keyword: 'CS:GO, CSGO', tags: '#CSGO', category: 'Игры', addedAt: 220 },
+      { keyword: 'Cube League 2, CubeLeague2', tags: '#CubeLeague2', category: 'Игры', addedAt: 221 },
+      { keyword: 'Cube World, CubeWorld', tags: '#CubeWorld', category: 'Игры', addedAt: 222 },
+      { keyword: 'Deadlock', tags: '#Deadlock', category: 'Игры', addedAt: 223 },
+      { keyword: 'Deponia', tags: '#Deponia', category: 'Игры', addedAt: 224 },
+      { keyword: 'Destiny 2, Destiny2', tags: '#Destiny2', category: 'Игры', addedAt: 225 },
+      { keyword: 'Detroit: Become Human, DetroitBecomeHuman', tags: '#DetroitBecomeHuman', category: 'Игры', addedAt: 226 },
+      { keyword: 'Digger Online, DiggerOnline', tags: '#DiggerOnline', category: 'Игры', addedAt: 227 },
+      { keyword: 'Dishonored', tags: '#Dishonored', category: 'Игры', addedAt: 228 },
+      { keyword: 'Dying Light: The Beast, DLTheBeast', tags: '#DLTheBeast', category: 'Игры', addedAt: 229 },
+      { keyword: 'DnD, D&D', tags: '#DnD', category: 'Игры', addedAt: 230 },
+      { keyword: 'Donkey Kong Bananza, DonkeyKongBananza', tags: '#DonkeyKongBananza', category: 'Игры', addedAt: 231 },
+      { keyword: 'Drive Beyond Horizons, DriveBeyondHorizons', tags: '#DriveBeyondHorizons', category: 'Игры', addedAt: 232 },
+      { keyword: 'Dying Light, DyingLight', tags: '#DyingLight', category: 'Игры', addedAt: 233 },
+      { keyword: 'Egging On, EggingOn', tags: '#EggingOn', category: 'Игры', addedAt: 234 },
+      { keyword: 'Euro Truck Simulator, EuroTruckSimulator', tags: '#EuroTruckSimulator', category: 'Игры', addedAt: 235 },
+      { keyword: 'Evolve', tags: '#Evolve', category: 'Игры', addedAt: 236 },
+      { keyword: 'Fall Guys, FallGuys', tags: '#FallGuys', category: 'Игры', addedAt: 237 },
+      { keyword: 'Fallout 76, Fallout76', tags: '#Fallout76', category: 'Игры', addedAt: 238 },
+      { keyword: 'Far Cry 5, FarCry5', tags: '#FarCry5', category: 'Игры', addedAt: 239 },
+      { keyword: 'Far Cry: New Dawn, FarCryNewDawn', tags: '#FarCryNewDawn', category: 'Игры', addedAt: 240 },
+      { keyword: 'Fortnite', tags: '#Fortnite', category: 'Игры', addedAt: 241 },
+      { keyword: 'Gartic Phone, GarticPhone', tags: '#GarticPhone', category: 'Игры', addedAt: 242 },
+      { keyword: 'Gartic Show, GarticShow', tags: '#GarticShow', category: 'Игры', addedAt: 243 },
+      { keyword: 'God of War, GodofWar', tags: '#GodOfWar', category: 'Игры', addedAt: 244 },
+      { keyword: 'GTA RP, GTARP', tags: '#GTARP', category: 'Игры', addedAt: 245 },
+      { keyword: 'GTA V, GTAV, GTA 5', tags: '#GTAV', category: 'Игры', addedAt: 246 },
+      { keyword: 'Half Sword, HalfSword', tags: '#HalfSword', category: 'Игры', addedAt: 247 },
+      { keyword: 'Hytale', tags: '#Hytale', category: 'Игры', addedAt: 248 },
+      { keyword: 'Injustice 2, Injustice2', tags: '#Injustice2', category: 'Игры', addedAt: 249 },
+      { keyword: 'inZOI', tags: '#inZOI', category: 'Игры', addedAt: 250 },
+      { keyword: 'Isaac, The Binding of Isaac', tags: '#Isaac', category: 'Игры', addedAt: 251 },
+      { keyword: 'Just Dance Now, Just Dance, JustDanceNow', tags: '#JustDanceNow', category: 'Игры', addedAt: 252 },
+      { keyword: 'Kingdom Come 2, KingdomCome2', tags: '#KingdomCome2', category: 'Игры', addedAt: 253 },
+      { keyword: 'Kukoro', tags: '#Kukoro', category: 'Игры', addedAt: 254 },
+      { keyword: 'Left 4 Dead 2, L4D2, Left4Dead2', tags: '#Left4Dead2', category: 'Игры', addedAt: 255 },
+      { keyword: 'Lego, LEGO', tags: '#Lego', category: 'Игры', addedAt: 256 },
+      { keyword: 'LEGO Marvel Super Heroes 2, LEGOMarvelSuperHeroes2', tags: '#LEGOMarvelSuperHeroes2', category: 'Игры', addedAt: 257 },
+      { keyword: 'Liar\'s Bar, LiarsBar', tags: '#LiarsBar', category: 'Игры', addedAt: 258 },
+      { keyword: 'Marvel Rivals, MarvelRivals', tags: '#MarvelRivals', category: 'Игры', addedAt: 259 },
+      { keyword: 'MC Wordle, MC_Wordle', tags: '#MC_Wordle', category: 'Игры', addedAt: 260 },
+      { keyword: 'Megabonk', tags: '#Megabonk', category: 'Игры', addedAt: 261 },
+      { keyword: 'MIMESIS', tags: '#MIMESIS', category: 'Игры', addedAt: 262 },
+      { keyword: 'Мини Игры, МиниИгры', tags: '#МиниИгры', category: 'Игры', addedAt: 263 },
+      { keyword: 'MiSide', tags: '#MiSide', category: 'Игры', addedAt: 264 },
+      { keyword: 'Mosquito Simulator, MosquitoSimulator', tags: '#MosquitoSimulator', category: 'Игры', addedAt: 265 },
+      { keyword: 'My Singing Monsters, MySingingMonsters', tags: '#MySingingMonsters', category: 'Игры', addedAt: 266 },
+      { keyword: 'My Voice Zoo, MyVoiceZoo', tags: '#MyVoiceZoo', category: 'Игры', addedAt: 267 },
+      { keyword: 'Noita', tags: '#Noita', category: 'Игры', addedAt: 268 },
+      { keyword: 'Overwatch', tags: '#Overwatch', category: 'Игры', addedAt: 269 },
+      { keyword: 'Palworld', tags: '#Palworld', category: 'Игры', addedAt: 270 },
+      { keyword: 'Party Animals, PartyAnimals', tags: '#PartyAnimals', category: 'Игры', addedAt: 271 },
+      { keyword: 'PEAK', tags: '#PEAK', category: 'Игры', addedAt: 272 },
+      { keyword: 'PicMe', tags: '#PicMe', category: 'Игры', addedAt: 273 },
+      { keyword: 'Portal 2, Portal2', tags: '#Portal2', category: 'Игры', addedAt: 274 },
+      { keyword: 'Project Zomboid, ProjectZomboid', tags: '#ProjectZomboid', category: 'Игры', addedAt: 275 },
+      { keyword: 'PvZ R, PvZR', tags: '#PvZR', category: 'Игры', addedAt: 276 },
+      { keyword: 'Raft', tags: '#Raft', category: 'Игры', addedAt: 277 },
+      { keyword: 'Red Dead Redemption 2, RDR2', tags: '#RDR2', category: 'Игры', addedAt: 278 },
+      { keyword: 'R.E.P.O, REPO', tags: '#REPO', category: 'Игры', addedAt: 279 },
+      { keyword: 'Resident Evil: Requiem, RErequiem', tags: '#RErequiem', category: 'Игры', addedAt: 280 },
+      { keyword: 'Roblox', tags: '#Roblox', category: 'Игры', addedAt: 281 },
+      { keyword: 'RV There Yet, RVThereYet', tags: '#RVThereYet', category: 'Игры', addedAt: 282 },
+      { keyword: 'Скам', tags: '#Скам', category: 'Игры', addedAt: 283 },
+      { keyword: 'Schedule 1, Schedule1', tags: '#Schedule1', category: 'Игры', addedAt: 284 },
+      { keyword: 'Sea of Thieves, SeaOfThieves', tags: '#SeaofThieves', category: 'Игры', addedAt: 285 },
+      { keyword: 'Sea of Thieves: Cursed Sails, SeaofThievesCursedSails', tags: '#SeaofThievesCursedSails', category: 'Игры', addedAt: 286 },
+      { keyword: 'Slime Rancher 2, SlimeRancher2', tags: '#SlimeRancher2', category: 'Игры', addedAt: 287 },
+      { keyword: 'Standoff', tags: '#Standoff', category: 'Игры', addedAt: 288 },
+      { keyword: 'Starbound', tags: '#Starbound', category: 'Игры', addedAt: 289 },
+      { keyword: 'Stardew Valley, StardewValley', tags: '#StardewValley', category: 'Игры', addedAt: 290 },
+      { keyword: 'State of Decay, StateOfDecay', tags: '#StateOfDecay', category: 'Игры', addedAt: 291 },
+      { keyword: 'State of Decay 2, StateOfDecay2', tags: '#StateofDecay2', category: 'Игры', addedAt: 292 },
+      { keyword: 'Steal a Brainrot, StealaBrainrot', tags: '#StealaBrainrot', category: 'Игры', addedAt: 293 },
+      { keyword: 'Streamer Life Simulator 2, StreamerLifeSimulator2', tags: '#StreamerLifeSimulator2', category: 'Игры', addedAt: 294 },
+      { keyword: 'Stronghold', tags: '#Stronghold', category: 'Игры', addedAt: 295 },
+      { keyword: 'Subnautica', tags: '#Subnautica', category: 'Игры', addedAt: 296 },
+      { keyword: 'Sunset Overdrive, SunsetOverdrive', tags: '#SunsetOverdrive', category: 'Игры', addedAt: 297 },
+      { keyword: 'Team Fortress 2, TF2', tags: '#TF2', category: 'Игры', addedAt: 298 },
+      { keyword: 'Terraria, Terriaria', tags: '#Terraria', category: 'Игры', addedAt: 299 },
+      { keyword: 'The Forest, TheForest', tags: '#TheForest', category: 'Игры', addedAt: 300 },
+      { keyword: 'The Headliners, TheHeadliners', tags: '#TheHeadliners', category: 'Игры', addedAt: 301 },
+      { keyword: 'The Legend Of Zelda: Breath Of The Wild, TheLegendOfZeldaBreathOfTheWild, Zelda', tags: '#TheLegendOfZeldaBreathOfTheWild', category: 'Игры', addedAt: 302 },
+      { keyword: 'The Long Drive, TheLongDrive', tags: '#TheLongDrive', category: 'Игры', addedAt: 303 },
+      { keyword: 'The Stanley Parable, TheStanleyParable', tags: '#TheStanleyParable', category: 'Игры', addedAt: 304 },
+      { keyword: 'Tricky Towers, TrickyTowers', tags: '#TrickyTowers', category: 'Игры', addedAt: 305 },
+      { keyword: 'Valheim', tags: '#Valheim', category: 'Игры', addedAt: 306 },
+      { keyword: 'Ведьмак', tags: '#Ведьмак', category: 'Игры', addedAt: 307 },
+      { keyword: 'VR', tags: '#VR', category: 'Игры', addedAt: 308 },
+      { keyword: 'We Escaped a Twisted Game, WeEscapedATwistedGame', tags: '#WeEscapedATwistedGame', category: 'Игры', addedAt: 309 },
+      { keyword: 'WorldBox', tags: '#WorldBox', category: 'Игры', addedAt: 310 },
+      { keyword: 'Аватария', tags: '#Аватария', category: 'Игры', addedAt: 311 },
+
+      // Аниме
+      { keyword: 'Дандадан', tags: '#Дандадан', category: 'Аниме', addedAt: 401 },
+      { keyword: 'Евангелион', tags: '#Евангелион', category: 'Аниме', addedAt: 402 },
+      { keyword: 'Гуррен-Лаганн, ГурренЛаганн', tags: '#ГурренЛаганн', category: 'Аниме', addedAt: 403 },
+      { keyword: 'Истребитель Демонов, ИстребительДемонов', tags: '#ИстребительДемонов', category: 'Аниме', addedAt: 404 },
+      { keyword: 'Кайдзи', tags: '#Кайдзи', category: 'Аниме', addedAt: 405 },
+      { keyword: 'Монолог Фармацевта, МонологФармацевта', tags: '#МонологФармацевта', category: 'Аниме', addedAt: 406 },
+      { keyword: 'Обещанный Неверленд, ОбещанныйНеверленд', tags: '#ОбещанныйНеверленд', category: 'Аниме', addedAt: 407 },
+      { keyword: 'Реинкарнация Безработного, РеинкарнацияБезработного', tags: '#РеинкарнацияБезработного', category: 'Аниме', addedAt: 408 },
+      { keyword: 'Re:Zero, ReZero', tags: '#ReZero', category: 'Аниме', addedAt: 409 },
+      { keyword: 'Фрирен', tags: '#Фрирен', category: 'Аниме', addedAt: 410 },
+      { keyword: 'Человек-Бензопила, ЧеловекБензопила', tags: '#ЧеловекБензопила', category: 'Аниме', addedAt: 411 },
+
+      // Фильмы & Сериалы
+      { keyword: 'Большой Куш, БольшойКуш', tags: '#БольшойКуш', category: 'Фильмы & Сериалы', addedAt: 501 },
+      { keyword: 'Время Приключений, ВремяПриключений', tags: '#ВремяПриключений', category: 'Фильмы & Сериалы', addedAt: 502 },
+      { keyword: 'Гравити Фолз, ГравитиФолз', tags: '#ГравитиФолз', category: 'Фильмы & Сериалы', addedAt: 503 },
+      { keyword: 'Kingsman, Kingsmen', tags: '#Kingsmen', category: 'Фильмы & Сериалы', addedAt: 504 },
+      { keyword: 'Кунг-Фу Панда, КунгФуПанда', tags: '#КунгФуПанда', category: 'Фильмы & Сериалы', addedAt: 505 },
+      { keyword: 'Кухня', tags: '#Кухня', category: 'Фильмы & Сериалы', addedAt: 506 },
+      { keyword: 'Леди Баг, ЛедиБаг', tags: '#ЛедиБаг', category: 'Фильмы & Сериалы', addedAt: 507 },
+      { keyword: 'Мадагаскар', tags: '#Мадагаскар', category: 'Фильмы & Сериалы', addedAt: 508 },
+      { keyword: 'Мачо и Ботан, МачоИБотан', tags: '#МачоИБотан', category: 'Фильмы & Сериалы', addedAt: 509 },
+      { keyword: 'My Little Pony, MyLittlePony', tags: '#MyLittlePony', category: 'Фильмы & Сериалы', addedAt: 510 },
+      { keyword: 'Неуязвимый', tags: '#Неуязвимый', category: 'Фильмы & Сериалы', addedAt: 511 },
+      { keyword: 'Пацаны', tags: '#Пацаны', category: 'Фильмы & Сериалы', addedAt: 512 },
+      { keyword: 'Пираты Карибского Моря, ПиратыКарибскогоМоря', tags: '#ПиратыКарибскогоМоря', category: 'Фильмы & Сериалы', addedAt: 513 },
+      { keyword: 'Подводная Братва, ПодводнаяБратва', tags: '#ПодводнаяБратва', category: 'Фильмы & Сериалы', addedAt: 514 },
+      { keyword: 'Spider-Man, Человек-Паук, SpiderMan', tags: '#SpiderMan', category: 'Фильмы & Сериалы', addedAt: 515 },
+      { keyword: 'Судья Дредд, СудьяДредд', tags: '#СудьяДредд', category: 'Фильмы & Сериалы', addedAt: 516 },
+      { keyword: 'Тьма', tags: '#Тьма', category: 'Фильмы & Сериалы', addedAt: 517 },
+
+      // События & Шоу
+      { keyword: 'Аукцион', tags: '#Аукцион', category: 'События & Шоу', addedAt: 601 },
+      { keyword: 'Bengan Yes, BenganYes', tags: '#BenganYes', category: 'События & Шоу', addedAt: 602 },
+      { keyword: 'Донатофон', tags: '#Донатофон', category: 'События & Шоу', addedAt: 603 },
+      { keyword: 'Игры Фуги, ИгрыФуги', tags: '#ИгрыФуги', category: 'События & Шоу', addedAt: 604 },
+      { keyword: 'IRL', tags: '#IRL', category: 'События & Шоу', addedAt: 605 },
+      { keyword: 'Концерт', tags: '#Концерт', category: 'События & Шоу', addedAt: 606 },
+      { keyword: 'Мама в 16, МамаВ16', tags: '#МамаВ16', category: 'События & Шоу', addedAt: 607 },
+      { keyword: 'ТикТоки, ТикТок, TikTok', tags: '#Tiktok', category: 'События & Шоу', addedAt: 608 }
+    ];
+
     const savedAutoImport = localStorage.getItem('autoImportDate');
     const autoImportDateVal = savedAutoImport === null ? true : (savedAutoImport === 'true');
+
+    const savedAutoHashtags = localStorage.getItem('autoHashtags');
+    const autoHashtagsVal = savedAutoHashtags === null ? true : (savedAutoHashtags === 'true');
+
+    const savedRulesVer = localStorage.getItem('hashtagRulesVer');
+    const savedRules = localStorage.getItem('hashtagRules');
+    let hashtagRulesVal = DEFAULT_HASHTAG_RULES;
+
+    if (savedRulesVer !== 'v3') {
+      // Force refresh defaults to v3 formatted titles with spaces and colons
+      hashtagRulesVal = JSON.parse(JSON.stringify(DEFAULT_HASHTAG_RULES));
+      localStorage.setItem('hashtagRules', JSON.stringify(hashtagRulesVal));
+      localStorage.setItem('hashtagRulesVer', 'v3');
+    } else if (savedRules) {
+      try {
+        const parsed = JSON.parse(savedRules);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          hashtagRulesVal = parsed;
+        }
+      } catch (e) {}
+    }
 
     let state = {
       streamDate: '',
@@ -580,7 +862,9 @@
       activePlayerStreamId: 'all',
       activeSeekTimes: {},
       playerViewMode: 'phone',
-      autoImportDate: autoImportDateVal
+      autoImportDate: autoImportDateVal,
+      autoHashtags: autoHashtagsVal,
+      hashtagRules: hashtagRulesVal
     };
 
     // --- Utilities ---
@@ -993,12 +1277,25 @@
         });
       }
 
-      // Hashtags
-      if (state.hashtags.trim()) {
+      // Hashtags (Manual + Auto-detected)
+      const hashtagSet = new Set();
+
+      // Collect manual hashtags
+      if (state.hashtags && state.hashtags.trim()) {
+        state.hashtags.trim().split(/\s+/).forEach(t => {
+          if (t) hashtagSet.add(t.startsWith('#') ? t : '#' + t);
+        });
+      }
+
+      // Collect auto hashtags
+      const autoTags = getDetectedAutoHashtags();
+      autoTags.forEach(t => hashtagSet.add(t));
+
+      if (hashtagSet.size > 0) {
         if (lines.length > 0 && lines[lines.length - 1] !== '') {
           lines.push('');
         }
-        lines.push(state.hashtags.trim());
+        lines.push(Array.from(hashtagSet).join(' '));
       }
 
       // Remove trailing blank lines
@@ -1007,6 +1304,90 @@
       }
 
       return lines.join('\n');
+    }
+
+    function getDetectedAutoHashtags() {
+      if (!state.autoHashtags || !state.hashtagRules || state.hashtagRules.length === 0) {
+        return [];
+      }
+
+      const fullContentText = [
+        state.mainTitle || '',
+        ...(state.mainMoments ? state.mainMoments.map(m => (m.title || '') + ' ' + (m.subMoments ? m.subMoments.map(s => s.title || '').join(' ') : '')) : []),
+        ...(state.extraStreams ? state.extraStreams.map(s => (s.title || '') + ' ' + (s.moments ? s.moments.map(m => (m.title || '') + ' ' + (m.subMoments ? m.subMoments.map(sub => sub.title || '').join(' ') : '')).join(' ') : '')) : [])
+      ].join(' ');
+
+      const detectedSet = new Set();
+
+      state.hashtagRules.forEach(rule => {
+        if (!rule.keyword || !rule.tags) return;
+        
+        // Split rule.keyword by comma or pipe to support multiple synonyms (e.g. "тиктоки, тикток, TikTok")
+        const subKeywords = rule.keyword.split(/[,|]/).map(k => k.trim()).filter(Boolean);
+        if (subKeywords.length === 0) return;
+
+        let matched = false;
+        for (const kw of subKeywords) {
+          const escapedKw = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          // Cyrillic & Latin friendly boundary matching
+          const regex = new RegExp('(?:^|[^a-zA-Z0-9а-яА-ЯёЁ_#])' + escapedKw + '(?=[^a-zA-Z0-9а-яА-ЯёЁ_]|$)', 'i');
+          if (regex.test(fullContentText)) {
+            matched = true;
+            break;
+          }
+        }
+
+        if (matched) {
+          rule.tags.trim().split(/\s+/).forEach(tag => {
+            if (tag.startsWith('#')) detectedSet.add(tag);
+            else if (tag) detectedSet.add('#' + tag);
+          });
+        }
+      });
+
+      return Array.from(detectedSet);
+    }
+
+    function renderAutoHashtagsBadges() {
+      const container = document.getElementById('autoHashtagsBadges');
+      if (!container) return;
+
+      if (!state.autoHashtags) {
+        container.innerHTML = `
+          <p class="text-[10px] text-slate-500 flex items-center space-x-1">
+            <i data-lucide="info" class="w-3 h-3 text-slate-500 shrink-0"></i>
+            <span>Автоподбор хэштегов выключен в настройках</span>
+          </p>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      const autoTags = getDetectedAutoHashtags();
+      if (autoTags.length > 0) {
+        container.innerHTML = `
+          <div class="p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-amber-400 flex items-center space-x-1">
+                <i data-lucide="sparkles" class="w-3 h-3 shrink-0"></i>
+                <span>Авто-хэштеги добавлены:</span>
+                <span class="px-1.5 py-0.2 text-[8px] font-extrabold rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider">BETA</span>
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1 pt-0.5">
+              ${autoTags.map(t => `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-[11px] font-semibold">${escapeHtml(t)}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <p class="text-[10px] text-slate-500 flex items-center space-x-1">
+            <i data-lucide="sparkles" class="w-3 h-3 text-amber-500/60 shrink-0"></i>
+            <span>Автоподбор <span class="px-1 py-0.2 text-[8px] font-extrabold rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wider">BETA</span> включен (хэштеги появятся при совпадении слов)</span>
+          </p>
+        `;
+      }
+      if (window.lucide) lucide.createIcons();
     }
 
     // --- UI Render & Helpers ---
@@ -1065,6 +1446,7 @@
       }
 
       updatePlayerTab();
+      renderAutoHashtagsBadges();
     }
 
     function formatSecondsToHHMMSS(totalSecs) {
@@ -1699,6 +2081,67 @@
       updateOutput();
     }
 
+    // --- Client-Side Date Extraction Helpers ---
+
+    const RU_MONTHS_MAP = {
+      'янв': 1, 'января': 1, 'январь': 1,
+      'фев': 2, 'февр': 2, 'февраля': 2, 'февраль': 2,
+      'мар': 3, 'марта': 3, 'март': 3,
+      'апр': 4, 'апреля': 4, 'апрель': 4,
+      'май': 5, 'мая': 5,
+      'июн': 6, 'июня': 6, 'июнь': 6,
+      'июл': 7, 'июля': 7, 'июль': 7,
+      'авг': 8, 'августа': 8, 'август': 8,
+      'сен': 9, 'сент': 9, 'сентября': 9, 'сентябрь': 9,
+      'окт': 10, 'октября': 10, 'октябрь': 10,
+      'ноя': 11, 'нояб': 11, 'ноября': 11, 'ноябрь': 11,
+      'дек': 12, 'декабря': 12, 'декабрь': 12
+    };
+
+    function parseDateTextClient(str) {
+      if (!str) return null;
+
+      // 1. ISO YYYY-MM-DD
+      const isoMatch = str.match(/(20\d\d)-([01]\d)-([03]\d)/);
+      if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+
+      // 2. DD.MM.YYYY
+      const dotMatch = str.match(/([0-3]?\d)\.([01]?\d)\.(20\d\d)/);
+      if (dotMatch) {
+        const day = dotMatch[1].padStart(2, '0');
+        const month = dotMatch[2].padStart(2, '0');
+        return `${dotMatch[3]}-${month}-${day}`;
+      }
+
+      // 3. Russian date e.g. "28 февр. 2019" or "28 февраля 2019"
+      const ruMatch = str.match(/([0-3]?\d)\s+([а-яяА-Я]+)\.?\s+(20\d\d)/i);
+      if (ruMatch) {
+        const day = ruMatch[1].padStart(2, '0');
+        const mStr = ruMatch[2].toLowerCase().trim().replace('.', '');
+        const mNum = RU_MONTHS_MAP[mStr];
+        if (mNum) {
+          const month = String(mNum).padStart(2, '0');
+          return `${ruMatch[3]}-${month}-${day}`;
+        }
+      }
+
+      return null;
+    }
+
+    function formatDateRuClient(isoStr) {
+      if (!isoStr) return '';
+      const match = isoStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (!match) return isoStr;
+      const year = match[1];
+      const monthIdx = parseInt(match[2], 10) - 1;
+      const day = parseInt(match[3], 10);
+      const mShortRu = ['янв.', 'фев.', 'мар.', 'апр.', 'мая', 'июн.', 'июл.', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+      if (monthIdx >= 0 && monthIdx < 12) {
+        return { short: `${day} ${mShortRu[monthIdx]} ${year}`, iso: isoStr };
+      }
+      return { short: isoStr, iso: isoStr };
+    }
+
     async function fetchVideoInfoAndApplyDate(url, isAuto = false) {
       if (!url || !url.trim()) {
         if (!isAuto) showToast('Укажите ссылку на видео');
@@ -1706,41 +2149,157 @@
       }
 
       const btn = document.getElementById('fetchDateBtn');
-      const statusEl = document.getElementById('fetchDateStatus');
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Ищем...</span>`;
-        lucide.createIcons();
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
+        if (window.lucide) lucide.createIcons();
       }
 
+      let foundDateShort = null;
+      let foundDateIso = null;
+
+      // 1. Attempt backend API route (if running on server environment)
       try {
-        const res = await fetch(`/api/video-info?url=${encodeURIComponent(url.trim())}`);
-        const data = await res.json();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1800);
+        const res = await fetch(`/api/video-info?url=${encodeURIComponent(url.trim())}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success && (data.dateFormattedShort || data.dateFormatted)) {
+            foundDateShort = data.dateFormattedShort || data.dateFormatted;
+            foundDateIso = data.dateIso;
+          }
+        }
+      } catch (e) {}
 
-        if (data && data.success && (data.dateFormattedShort || data.dateFormatted)) {
-          const chosenDate = data.dateFormattedShort || data.dateFormatted;
-          state.streamDate = chosenDate;
-          const dateInput = document.getElementById('streamDate');
-          if (dateInput) dateInput.value = chosenDate;
+      // 2. Client-side fallback for static websites (GitHub Pages, static host, etc.)
+      if (!foundDateShort) {
+        const ytId = extractVideoId(url.trim());
+        if (ytId) {
+          // 2a. Invidious CORS APIs
+          const invidiousEndpoints = [
+            `https://inv.tux.pizza/api/v1/videos/${ytId}`,
+            `https://invidious.nerdvpn.de/api/v1/videos/${ytId}`,
+            `https://vid.puffyan.us/api/v1/videos/${ytId}`
+          ];
 
-          if (data.dateIso) {
-            const picker = document.getElementById('streamDatePicker');
-            if (picker) picker.value = data.dateIso;
+          for (const instUrl of invidiousEndpoints) {
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 2000);
+              const res = await fetch(instUrl, { signal: controller.signal });
+              clearTimeout(timeoutId);
+              if (res.ok) {
+                const data = await res.json();
+                let rawDate = data.publishedText || data.uploadDate || data.published;
+                if (data.published && typeof data.published === 'number') {
+                  const d = new Date(data.published * 1000);
+                  rawDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                }
+                const parsed = parseDateTextClient(String(rawDate || ''));
+                if (parsed) {
+                  const formatted = formatDateRuClient(parsed);
+                  foundDateShort = formatted.short;
+                  foundDateIso = formatted.iso;
+                  break;
+                }
+              }
+            } catch (e) {}
           }
 
-          updateOutput();
-          showToast(`Дата из видео подтянута: ${chosenDate}`);
-        } else {
-          if (!isAuto) showToast('Не удалось извлечь дату из видео');
+          // 2b. AllOrigins CORS Proxy to parse YouTube HTML
+          if (!foundDateShort) {
+            try {
+              const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.youtube.com/watch?v=' + ytId)}`;
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 3000);
+              const res = await fetch(proxyUrl, { signal: controller.signal });
+              clearTimeout(timeoutId);
+              if (res.ok) {
+                const json = await res.json();
+                const html = json.contents || '';
+                const candidates = [];
+                const metaUpload = html.match(/itemprop="uploadDate"\s+content="([^"]+)"/i);
+                if (metaUpload) candidates.push(metaUpload[1]);
+                const metaPub = html.match(/itemprop="datePublished"\s+content="([^"]+)"/i);
+                if (metaPub) candidates.push(metaPub[1]);
+                const jsonUpload = html.match(/"uploadDate"\s*:\s*"([^"]+)"/i);
+                if (jsonUpload) candidates.push(jsonUpload[1]);
+                const dateTextM = html.match(/"dateText"\s*:\s*\{\s*"simpleText"\s*:\s*"([^"]+)"\s*\}/i);
+                if (dateTextM) candidates.push(dateTextM[1]);
+
+                for (const cand of candidates) {
+                  const parsed = parseDateTextClient(cand);
+                  if (parsed) {
+                    const formatted = formatDateRuClient(parsed);
+                    foundDateShort = formatted.short;
+                    foundDateIso = formatted.iso;
+                    break;
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+
+          // 2c. YouTube oEmbed
+          if (!foundDateShort) {
+            try {
+              const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
+              if (res.ok) {
+                const oembedData = await res.json();
+                if (oembedData && oembedData.title) {
+                  const parsed = parseDateTextClient(oembedData.title);
+                  if (parsed) {
+                    const formatted = formatDateRuClient(parsed);
+                    foundDateShort = formatted.short;
+                    foundDateIso = formatted.iso;
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+        } else if (url.includes('vk.com') || url.includes('vkvideo.ru')) {
+          try {
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url.trim())}`;
+            const res = await fetch(proxyUrl);
+            if (res.ok) {
+              const json = await res.json();
+              const html = json.contents || '';
+              const candMatch = html.match(/itemprop="uploadDate"\s+content="([^"]+)"/i) || html.match(/"uploadDate"\s*:\s*"([^"]+)"/i) || html.match(/\b(20\d\d-[01]\d-[03]\d)\b/);
+              if (candMatch) {
+                const parsed = parseDateTextClient(candMatch[1]);
+                if (parsed) {
+                  const formatted = formatDateRuClient(parsed);
+                  foundDateShort = formatted.short;
+                  foundDateIso = formatted.iso;
+                }
+              }
+            }
+          } catch (e) {}
         }
-      } catch (err) {
-        if (!isAuto) showToast('Ошибка при загрузке информации о видео');
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `<i data-lucide="calendar" class="w-3.5 h-3.5"></i>`;
-          lucide.createIcons();
+      }
+
+      if (foundDateShort) {
+        state.streamDate = foundDateShort;
+        const dateInput = document.getElementById('streamDate');
+        if (dateInput) dateInput.value = foundDateShort;
+
+        if (foundDateIso) {
+          const picker = document.getElementById('streamDatePicker');
+          if (picker) picker.value = foundDateIso;
         }
+
+        updateOutput();
+        showToast(`Дата из видео подтянута: ${foundDateShort}`);
+      } else {
+        if (!isAuto) showToast('Не удалось извлечь дату из видео');
+      }
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="calendar" class="w-3.5 h-3.5"></i>`;
+        if (window.lucide) lucide.createIcons();
       }
     }
 
@@ -2105,8 +2664,13 @@
       const box = document.getElementById('settingsModalBox');
       if (!modal || !box) return;
 
-      const toggle = document.getElementById('autoImportDateToggle');
-      if (toggle) toggle.checked = !!state.autoImportDate;
+      const dateToggle = document.getElementById('autoImportDateToggle');
+      if (dateToggle) dateToggle.checked = !!state.autoImportDate;
+
+      const tagToggle = document.getElementById('autoHashtagsToggle');
+      if (tagToggle) tagToggle.checked = !!state.autoHashtags;
+
+      renderHashtagRulesInSettings();
 
       modal.classList.remove('opacity-0', 'pointer-events-none');
       box.classList.remove('scale-95');
@@ -2135,6 +2699,178 @@
       state.autoImportDate = checked;
       localStorage.setItem('autoImportDate', checked);
       showToast(checked ? 'Автоимпорт даты включён' : 'Автоимпорт даты выключен');
+    }
+
+    function toggleAutoHashtags(checked) {
+      state.autoHashtags = checked;
+      localStorage.setItem('autoHashtags', checked);
+      updateOutput();
+      showToast(checked ? 'Автоподбор хэштегов включён' : 'Автоподбор хэштегов выключен');
+    }
+
+    let currentHashtagCategory = 'Все';
+
+    function setHashtagCategoryFilter(cat) {
+      currentHashtagCategory = cat;
+      renderHashtagRulesInSettings();
+    }
+
+    function renderCategoryTabs() {
+      const container = document.getElementById('categoryFilterTabs');
+      if (!container) return;
+
+      let html = '';
+      HASHTAG_CATEGORIES.forEach(cat => {
+        const isActive = (currentHashtagCategory === cat);
+        const count = cat === 'Все'
+          ? (state.hashtagRules || []).length
+          : (state.hashtagRules || []).filter(r => (r.category || 'Другое') === cat).length;
+
+        if (count === 0 && cat !== 'Все') return;
+
+        html += `
+          <button onclick="setHashtagCategoryFilter('${escapeHtml(cat)}')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
+            isActive
+              ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+              : 'bg-slate-950/80 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800'
+          }">
+            <span>${escapeHtml(cat)}</span>
+            <span class="ml-1 text-[10px] opacity-75">(${count})</span>
+          </button>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function renderHashtagRulesInSettings() {
+      renderCategoryTabs();
+
+      const container = document.getElementById('hashtagRulesList');
+      if (!container) return;
+
+      if (!state.hashtagRules) state.hashtagRules = [];
+
+      const searchInput = document.getElementById('ruleSearchInput');
+      const sortSelect = document.getElementById('ruleSortSelect');
+
+      const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const sortMode = sortSelect ? sortSelect.value : 'alpha';
+
+      // 1. Filter by category & search query
+      let filtered = state.hashtagRules.filter(r => {
+        if (currentHashtagCategory !== 'Все') {
+          const ruleCat = r.category || 'Другое';
+          if (ruleCat !== currentHashtagCategory) return false;
+        }
+        if (query) {
+          const kw = (r.keyword || '').toLowerCase();
+          const tags = (r.tags || '').toLowerCase();
+          const cat = (r.category || '').toLowerCase();
+          return kw.includes(query) || tags.includes(query) || cat.includes(query);
+        }
+        return true;
+      });
+
+      // 2. Sort
+      if (sortMode === 'recent') {
+        filtered.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+      } else {
+        // Alphabetical by keyword
+        filtered.sort((a, b) => (a.keyword || '').localeCompare(b.keyword || '', 'ru', { sensitivity: 'base' }));
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-950/20">
+            Правила не найдены. Попробуйте изменить поиск или фильтр категории.
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((rule) => {
+        const realIdx = state.hashtagRules.indexOf(rule);
+        html += `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 transition-all text-xs gap-2">
+            <div class="flex items-center space-x-2.5 min-w-0 pr-1 flex-1">
+              <span class="font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md shrink-0">${escapeHtml(rule.keyword)}</span>
+              <span class="text-slate-300 font-medium truncate">${escapeHtml(rule.tags)}</span>
+            </div>
+            <div class="flex items-center space-x-2 shrink-0">
+              <span class="text-[10px] text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md">${escapeHtml(rule.category || 'Другое')}</span>
+              <button onclick="deleteHashtagRule(${realIdx})" class="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer" title="Удалить правило">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function addHashtagRule() {
+      const kwInput = document.getElementById('newRuleKeyword');
+      const tagsInput = document.getElementById('newRuleTags');
+      const catSelect = document.getElementById('newRuleCategory');
+      if (!kwInput || !tagsInput) return;
+
+      const keyword = kwInput.value.trim();
+      let tags = tagsInput.value.trim();
+      const category = catSelect ? catSelect.value : 'Другое';
+
+      if (!keyword) {
+        showToast('Укажите ключевое слово');
+        return;
+      }
+      if (!tags) {
+        showToast('Укажите хэштеги');
+        return;
+      }
+
+      // Add leading '#' if missing
+      tags = tags.split(/\s+/).map(t => t.startsWith('#') ? t : '#' + t).join(' ');
+
+      const existingIdx = state.hashtagRules.findIndex(r => r.keyword.toLowerCase() === keyword.toLowerCase());
+      if (existingIdx >= 0) {
+        state.hashtagRules[existingIdx].tags = tags;
+        state.hashtagRules[existingIdx].category = category;
+        state.hashtagRules[existingIdx].addedAt = Date.now();
+      } else {
+        state.hashtagRules.push({ keyword, tags, category, addedAt: Date.now() });
+      }
+
+      saveHashtagRules();
+      kwInput.value = '';
+      tagsInput.value = '';
+      renderHashtagRulesInSettings();
+      updateOutput();
+      showToast(`Правило «${keyword}» добавлено!`);
+    }
+
+    function deleteHashtagRule(idx) {
+      if (idx >= 0 && idx < state.hashtagRules.length) {
+        const removed = state.hashtagRules[idx];
+        state.hashtagRules.splice(idx, 1);
+        saveHashtagRules();
+        renderHashtagRulesInSettings();
+        updateOutput();
+        showToast(`Правило «${removed.keyword}» удалено`);
+      }
+    }
+
+    function resetHashtagRules() {
+      state.hashtagRules = JSON.parse(JSON.stringify(DEFAULT_HASHTAG_RULES));
+      saveHashtagRules();
+      renderHashtagRulesInSettings();
+      updateOutput();
+      showToast('Список хэштегов сброшен к стандартным');
+    }
+
+    function saveHashtagRules() {
+      localStorage.setItem('hashtagRules', JSON.stringify(state.hashtagRules));
     }
 
     // --- Text Import Engine ---
