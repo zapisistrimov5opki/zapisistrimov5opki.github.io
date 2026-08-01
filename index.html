@@ -27,18 +27,33 @@
   <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <style>
-    ::-webkit-scrollbar {
+    .custom-scrollbar::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
-    ::-webkit-scrollbar-track {
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+      border: 2px solid #020617;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+    
+    body::-webkit-scrollbar {
+      width: 10px;
+    }
+    body::-webkit-scrollbar-track {
       background: #020617;
     }
-    ::-webkit-scrollbar-thumb {
+    body::-webkit-scrollbar-thumb {
       background: #1e293b;
       border-radius: 4px;
     }
-    ::-webkit-scrollbar-thumb:hover {
+    body::-webkit-scrollbar-thumb:hover {
       background: #334155;
     }
     .toast-animate {
@@ -347,7 +362,7 @@
           <div id="mediaOutputCard-body" class="transition-all duration-200">
             <!-- Tab 1: Formatted Description Text Output (Active First) -->
             <div id="tabContentOutput" class="space-y-3">
-              <textarea id="outputArea" readonly rows="7" placeholder="Здесь будет сгенерированный текст таймкодов..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-slate-200 focus:outline-none resize-none leading-relaxed select-all placeholder-slate-700 custom-scrollbar"></textarea>
+              <textarea id="outputArea" readonly rows="10" placeholder="Здесь будет сгенерированный текст таймкодов..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-slate-200 focus:outline-none resize-y select-all placeholder-slate-700 custom-scrollbar"></textarea>
 
               <div class="flex items-center justify-between text-xs text-slate-500 px-1 pt-1">
                 <div class="flex items-center space-x-3">
@@ -358,20 +373,25 @@
                   </a>
                 </div>
 
-                <button id="copyBtn" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/10 cursor-pointer">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                  <span id="copyBtnText">Скопировать</span>
-                </button>
+                <div class="flex items-center space-x-2">
+                  <select id="outputFormatSelect" onchange="changeOutputFormat(this.value)" class="bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-amber-500 cursor-pointer">
+                    <option value="default">Обычный</option>
+                    <option value="plain">Компактный</option>
+                  </select>
+                  <button id="copyBtn" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/10 cursor-pointer">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span id="copyBtnText">Скопировать</span>
+                  </button>
+                </div>
               </div>
-            </div>
 
+            </div>
             <!-- Tab 2: Players (Hidden by default, shown when Player tab clicked) -->
             <div id="tabContentPlayers" class="hidden space-y-4">
               <div id="allPlayersContainer" class="space-y-4"></div>
             </div>
           </div>
         </div>
-
         <!-- Notepad Window (Блокнот заметок под окном с текстом и плеером) -->
         <div id="notepadCard" class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
@@ -397,7 +417,7 @@
           </div>
 
           <div id="notepadCard-body" class="space-y-3 transition-all duration-200">
-            <textarea id="notepadInput" rows="4" placeholder="Ваши быстрые заметки, черновик, мысли..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500 leading-relaxed resize-y custom-scrollbar"></textarea>
+            <textarea id="notepadInput" rows="4" placeholder="Ваши быстрые заметки, черновик, мысли..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500 resize-y custom-scrollbar"></textarea>
             <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
               <span>Символов: <strong id="notepadCharCount" class="text-slate-300">0</strong> | Слов: <strong id="notepadWordCount" class="text-slate-300">0</strong></span>
             </div>
@@ -552,7 +572,7 @@
 
         <!-- Textarea -->
         <div class="relative">
-          <textarea id="importInputText" rows="10" placeholder="Вставьте сюда готовый текст описания, например:&#10;&#10;Запись за 10 июл. 2026&#10;Основной:&#10;1) Название момента (01:23:45)&#10;https://youtu.be/...&#10;- Подмомент (01:25:00)&#10;&#10;Дневной:&#10;1) Доп. момент (00:15:30)&#10;&#10;#FreakLand #стрим #моменты" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 leading-relaxed resize-y"></textarea>
+          <textarea id="importInputText" rows="10" placeholder="Вставьте сюда готовый текст описания, например:&#10;&#10;Запись за 10 июл. 2026&#10;Основной:&#10;1) Название момента (01:23:45)&#10;https://youtu.be/...&#10;- Подмомент (01:25:00)&#10;&#10;Дневной:&#10;1) Доп. момент (00:15:30)&#10;&#10;#FreakLand #стрим #моменты" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 resize-y"></textarea>
         </div>
 
         <!-- Import Mode Selection -->
@@ -911,7 +931,9 @@
       activeSeekTimes: {},
       playerViewMode: 'phone',
       autoHashtags: autoHashtagsVal,
-      hashtagRules: hashtagRulesVal
+      hashtagRules: hashtagRulesVal,
+      excludedAutoHashtags: [],
+      outputFormat: localStorage.getItem('outputFormat') || 'default'
     };
 
     // --- Utilities ---
@@ -1209,6 +1231,12 @@
       return null;
     }
 
+    function buildTimestampLink(baseUrl, timeStr, overrideUrl = '') {
+      const url = (overrideUrl || '').trim() || (baseUrl || '').trim();
+      if (!url) return '';
+      return appendTimestampToUrl(url, timeStr);
+    }
+
     function appendTimestampToUrl(baseUrl, timeStr) {
       if (!baseUrl) return '';
       const platform = detectPlatform(baseUrl);
@@ -1221,35 +1249,7 @@
         return `${cleanUrl}${joiner}tc=${param}`;
       }
 
-      const cleanUrl = baseUrl.replace(/([?&])(tc|t|time|at)=[^&]*/g, '$1').replace(/[?&]$/, '').replace(/\?&/, '?');
-      const joiner = cleanUrl.includes('?') ? '&' : '?';
-      return `${cleanUrl}${joiner}t=${param}`;
-    }
-
-    function buildTimestampLink(rawUrlOrId, timeStr, customUrlOverride) {
-      if (customUrlOverride && customUrlOverride.trim()) {
-        return appendTimestampToUrl(customUrlOverride.trim(), timeStr);
-      }
-      if (!rawUrlOrId || !rawUrlOrId.trim()) return '';
-
-      const input = rawUrlOrId.trim();
-      const platform = detectPlatform(input);
-
-      if (platform === 'youtube') {
-        const cleanId = extractVideoId(input);
-        if (cleanId) {
-          const baseHost = `https://youtu.be/${cleanId}`;
-          const param = parseTimeToParam(timeStr, 'youtube');
-          return param ? `${baseHost}?t=${param}` : baseHost;
-        }
-      }
-
-      if (input.startsWith('http://') || input.startsWith('https://')) {
-        return appendTimestampToUrl(input, timeStr);
-      }
-
-      const param = parseTimeToParam(timeStr, platform);
-      return param ? `${input}?t=${param}` : input;
+      return param ? `${baseUrl}?t=${param}` : baseUrl;
     }
 
     // --- Text Output Generator ---
@@ -1257,71 +1257,107 @@
     function generateFormattedText() {
       let lines = [];
 
-      // Date Header
-      if (state.streamDate.trim()) {
-        lines.push(`Запись за ${state.streamDate.trim()}`);
-        lines.push('');
-      }
+      if (state.outputFormat === 'plain') {
+        const addPlainMoments = (moments) => {
+          moments.forEach((item) => {
+            const timeTrimmed = (item.time || "").trim() || '0:00';
+            lines.push(`${timeTrimmed} - ${(item.title || "").trim()}`);
+            if (item.subMoments && item.subMoments.length > 0) {
+              item.subMoments.forEach(sub => {
+                const subTimeTrimmed = (sub.time || "").trim() || '0:00';
+                lines.push(`${subTimeTrimmed} - ${(sub.title || "").trim()}`);
+              });
+            }
+          });
+        };
 
-      const hasMain = state.mainMoments.length > 0;
-      const hasExtra = state.extraStreams.some(s => s.moments.length > 0);
-
-      if (hasMain || hasExtra) {
-        lines.push('Интересные моменты стрима:');
-      }
-
-      // Main Section
-      if (hasMain) {
-        const mTitle = state.mainTitle.trim() || 'Основной';
-        lines.push(`${mTitle}:`);
-
-        state.mainMoments.forEach((item, idx) => {
-          const num = idx + 1;
-          const timeTag = item.time.trim() ? ` (${item.time.trim()})` : '';
-          lines.push(`${num}) ${item.title.trim()}${timeTag}`);
-          const link = buildTimestampLink(state.videoId, item.time, item.videoUrlOverride);
-          if (link) lines.push(link);
-
-          if (item.subMoments && item.subMoments.length > 0) {
-            item.subMoments.forEach(sub => {
-              const subTimeTag = sub.time.trim() ? ` (${sub.time.trim()})` : '';
-              lines.push(`- ${sub.title.trim()}${subTimeTag}`);
-              const subLink = buildTimestampLink(state.videoId, sub.time, sub.videoUrlOverride);
-              if (subLink) lines.push(subLink);
-            });
-          }
-          lines.push('');
-        });
-      }
-
-      // Additional Streams
-      if (hasExtra) {
+        if (state.mainMoments.length > 0) {
+          addPlainMoments(state.mainMoments);
+        }
+        
         state.extraStreams.forEach((stream) => {
           if (stream.moments.length > 0) {
-            const sTitle = stream.title.trim() || 'Дополнительный';
-            lines.push(`${sTitle}:`);
-            const sUrl = stream.streamUrl.trim() || state.videoId.trim();
-
-            stream.moments.forEach((item, idx) => {
-              const num = idx + 1;
-              const timeTag = item.time.trim() ? ` (${item.time.trim()})` : '';
-              lines.push(`${num}) ${item.title.trim()}${timeTag}`);
-
-              const link = buildTimestampLink(sUrl, item.time, item.videoUrlOverride);
-              if (link) lines.push(link);
-
-              if (item.subMoments && item.subMoments.length > 0) {
-                item.subMoments.forEach(sub => {
-                  const subTimeTag = sub.time.trim() ? ` (${sub.time.trim()})` : '';
-                  lines.push(`- ${sub.title.trim()}${subTimeTag}`);
-                  const subLink = buildTimestampLink(sUrl, sub.time, sub.videoUrlOverride);
-                  if (subLink) lines.push(subLink);
-                });
-              }
-              lines.push('');
-            });
+            if (lines.length > 0) lines.push('');
+            lines.push(`${(stream.title || "").trim() || 'Дополнительный'}:`);
+            addPlainMoments(stream.moments);
           }
         });
+      } else {
+        // Date Header
+        if (state.streamDate.trim()) {
+          lines.push(`Запись за ${state.streamDate.trim()}`);
+          lines.push('');
+        }
+
+        const hasMain = state.mainMoments.length > 0;
+        const hasExtra = state.extraStreams.some(s => s.moments.length > 0);
+
+        if (hasMain || hasExtra) {
+          lines.push('Интересные моменты стрима:');
+        }
+
+        // Main Section
+        if (hasMain) {
+          const mTitle = state.mainTitle.trim() || 'Основной';
+          lines.push(`${mTitle}:`);
+
+          state.mainMoments.forEach((item, idx) => {
+            const num = idx + 1;
+            const timeTag = (item.time || "").trim() ? ` (${(item.time || "").trim()})` : '';
+            lines.push(`${num}) ${(item.title || "").trim()}${timeTag}`);
+            const link = buildTimestampLink(state.videoId, item.time, item.videoUrlOverride);
+            
+            let skipParentLink = false;
+            if (item.subMoments && item.subMoments.length > 0) {
+              skipParentLink = item.subMoments.some(sub => (sub.time || "").trim() === (item.time || "").trim());
+            }
+            if (link && !skipParentLink) lines.push(link);
+
+            if (item.subMoments && item.subMoments.length > 0) {
+              item.subMoments.forEach(sub => {
+                const subTimeTag = (sub.time || "").trim() ? ` (${(sub.time || "").trim()})` : '';
+                lines.push(`- ${(sub.title || "").trim()}${subTimeTag}`);
+                const subLink = buildTimestampLink(state.videoId, sub.time, sub.videoUrlOverride);
+                if (subLink) lines.push(subLink);
+              });
+            }
+            lines.push('');
+          });
+        }
+
+        // Additional Streams
+        if (hasExtra) {
+          state.extraStreams.forEach((stream) => {
+            if (stream.moments.length > 0) {
+              const sTitle = (stream.title || "").trim() || 'Дополнительный';
+              lines.push(`${sTitle}:`);
+              const sUrl = stream.streamUrl.trim() || state.videoId.trim();
+
+              stream.moments.forEach((item, idx) => {
+                const num = idx + 1;
+                const timeTag = (item.time || "").trim() ? ` (${(item.time || "").trim()})` : '';
+                lines.push(`${num}) ${(item.title || "").trim()}${timeTag}`);
+                const link = buildTimestampLink(sUrl, item.time, item.videoUrlOverride);
+                
+                let skipParentLink = false;
+                if (item.subMoments && item.subMoments.length > 0) {
+                  skipParentLink = item.subMoments.some(sub => (sub.time || "").trim() === (item.time || "").trim());
+                }
+                if (link && !skipParentLink) lines.push(link);
+
+                if (item.subMoments && item.subMoments.length > 0) {
+                  item.subMoments.forEach(sub => {
+                    const subTimeTag = (sub.time || "").trim() ? ` (${(sub.time || "").trim()})` : '';
+                    lines.push(`- ${(sub.title || "").trim()}${subTimeTag}`);
+                    const subLink = buildTimestampLink(sUrl, sub.time, sub.videoUrlOverride);
+                    if (subLink) lines.push(subLink);
+                  });
+                }
+                lines.push('');
+              });
+            }
+          });
+        }
       }
 
       // Hashtags (Manual + Auto-detected)
@@ -1351,6 +1387,21 @@
       }
 
       return lines.join('\n');
+    }
+
+    function excludeAutoHashtag(tag) {
+      if (!state.excludedAutoHashtags) state.excludedAutoHashtags = [];
+      if (!state.excludedAutoHashtags.includes(tag)) {
+        state.excludedAutoHashtags.push(tag);
+      }
+      updateOutput();
+      renderAutoHashtagsBadges();
+    }
+
+    function changeOutputFormat(format) {
+      state.outputFormat = format;
+      localStorage.setItem('outputFormat', format);
+      updateOutput();
     }
 
     function getDetectedAutoHashtags() {
@@ -1396,7 +1447,11 @@
         }
       });
 
-      return Array.from(detectedSet);
+      let arr = Array.from(detectedSet);
+      if (state.excludedAutoHashtags && state.excludedAutoHashtags.length > 0) {
+        arr = arr.filter(t => !state.excludedAutoHashtags.includes(t));
+      }
+      return arr;
     }
 
     function renderAutoHashtagsBadges() {
@@ -1410,7 +1465,7 @@
             <span>Автоподбор хэштегов выключен в настройках</span>
           </p>
         `;
-        if (window.lucide) lucide.createIcons();
+        if (window.lucide) if (window.lucide) lucide.createIcons();
         return;
       }
 
@@ -1426,7 +1481,7 @@
               </span>
             </div>
             <div class="flex flex-wrap gap-1 pt-0.5">
-              ${autoTags.map(t => `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-[11px] font-semibold">${escapeHtml(t)}</span>`).join('')}
+              ${autoTags.map(t => `<span onclick="excludeAutoHashtag('${escapeHtml(t)}')" class="cursor-pointer hover:bg-red-500/20 hover:text-red-300 px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-[11px] font-semibold transition-colors" title="Нажмите, чтобы удалить">${escapeHtml(t)}</span>`).join('')}
             </div>
           </div>
         `;
@@ -2077,9 +2132,9 @@
 
             if (m.subMoments && m.subMoments.length > 0) {
               m.subMoments.forEach((sub, sIdx) => {
-                const subTimeStr = sub.time ? sub.time.trim() : '0:00';
+                const subTimeStr = sub.time ? (sub.time || "").trim() : '0:00';
                 const subSecs = timeToSeconds(subTimeStr);
-                const subTitleStr = sub.title.trim() || `Подмомент ${sIdx + 1}`;
+                const subTitleStr = (sub.title || "").trim() || `Подмомент ${sIdx + 1}`;
                 const subUrl = sub.videoUrlOverride ? sub.videoUrlOverride.trim() : itemUrl;
 
                 itemsListHtml += `
@@ -2186,98 +2241,34 @@
     // --- Main Moments Renders & Logic ---
 
     function renderMainMoments() {
-      const container = document.getElementById('mainMomentsList');
-      if (state.mainMoments.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950/20">
-            <p class="text-xs text-slate-500 mb-3">Основной список моментов пуст</p>
-            <div class="flex items-center justify-center space-x-2 flex-wrap gap-2">
-              <button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>Добавить начало стрима</span>
-              </button>
-            </div>
-          </div>
-        `;
-        lucide.createIcons();
-        updateOutput();
-        return;
-      }
-
-      let html = '';
-      state.mainMoments.forEach((item, idx) => {
-        const linkPreview = buildTimestampLink(state.videoId, item.time, item.videoUrlOverride);
-
-        let subHtml = '';
-        if (item.subMoments && item.subMoments.length > 0) {
-          subHtml = `<div class="mt-2 pl-4 space-y-2 border-l-2 border-slate-800">`;
-          item.subMoments.forEach((sub, subIdx) => {
-            subHtml += `
-              <div class="flex items-center space-x-2">
-                <span class="text-[11px] text-slate-500 font-mono">-</span>
-                <input type="text" value="${escapeHtml(sub.title)}" oninput="updateSubMoment('${item.id}', '${sub.id}', 'title', this.value)" placeholder="Название подпункта" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
-                <input type="text" value="${escapeHtml(sub.time)}" oninput="updateSubMoment('${item.id}', '${sub.id}', 'time', this.value)" placeholder="6:37" class="w-20 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-amber-400 placeholder-slate-600 focus:outline-none focus:border-amber-500">
-                <button onclick="deleteSubMoment('${item.id}', '${sub.id}')" class="p-1 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg transition-colors cursor-pointer" title="Удалить подпункт">
-                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            `;
-          });
-          subHtml += `</div>`;
+      try {
+        const container = document.getElementById('mainMomentsList');
+        if (state.mainMoments.length === 0) {
+          container.innerHTML = `<div class="text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950/20"><p class="text-xs text-slate-500 mb-3">Основной список моментов пуст</p><div class="flex items-center justify-center space-x-2 flex-wrap gap-2"><button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Добавить начало стрима</span></button></div></div>`;
+          if (window.lucide) lucide.createIcons();
+          updateOutput();
+          return;
         }
-
-        html += `
-          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
-            <div class="flex items-center space-x-2">
-              <span class="text-xs font-bold text-slate-500 font-mono w-5">${idx + 1})</span>
-              <input type="text" value="${escapeHtml(item.title)}" oninput="updateMainMoment('${item.id}', 'title', this.value)" placeholder="Название момента" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500">
-              <input type="text" value="${escapeHtml(item.time)}" oninput="updateMainMoment('${item.id}', 'time', this.value)" placeholder="3:10" class="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-amber-400 placeholder-slate-600 focus:outline-none focus:border-amber-500">
-
-              <button onclick="moveMainMoment(${idx}, 'up')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вверх"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
-              <button onclick="moveMainMoment(${idx}, 'down')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вниз"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
-              <button onclick="deleteMainMoment('${item.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer" title="Удалить"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-            </div>
-
-            ${linkPreview ? `
-              <div class="pl-7 text-[11px] font-mono text-slate-500 flex items-center space-x-1 truncate">
-                <span class="text-slate-600">Ссылка:</span>
-                <span class="text-slate-400 underline decoration-slate-800 truncate">${escapeHtml(linkPreview)}</span>
-              </div>
-            ` : ''}
-
-            ${subHtml}
-
-            <div class="pl-7 pt-1">
-              <button onclick="addSubMoment('${item.id}')" class="text-[11px] text-amber-400/80 hover:text-amber-300 flex items-center space-x-1 cursor-pointer">
-                <i data-lucide="plus" class="w-3 h-3"></i>
-                <span>Добавить подпункт</span>
-              </button>
-            </div>
-          </div>
-        `;
-      });
-
-      // Bottom quick action bar when items exist
-      html += `
-        <div class="pt-2 flex items-center space-x-2 flex-wrap gap-2">
-          <button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>Начало</span>
-          </button>
-          <button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>Момент</span>
-          </button>
-          <button onclick="addMainMoment('Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>Реакция</span>
-          </button>
-        </div>
-      `;
-
-      container.innerHTML = html;
-      lucide.createIcons();
-      updateOutput();
+        let html = '';
+        state.mainMoments.forEach((item, idx) => {
+          const linkPreview = buildTimestampLink(state.videoId, item.time, item.videoUrlOverride);
+          let subHtml = '';
+          if (item.subMoments && item.subMoments.length > 0) {
+            subHtml = `<div class="mt-2 pl-4 space-y-2 border-l-2 border-slate-800">`;
+            item.subMoments.forEach((sub, subIdx) => {
+              subHtml += `<div class="flex items-center space-x-2"><span class="text-[11px] text-slate-500 font-mono">-</span><input type="text" value="${escapeHtml(sub.title)}" oninput="updateSubMoment('${item.id}', '${sub.id}', 'title', this.value)" placeholder="Название подпункта" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"><input type="text" value="${escapeHtml(sub.time)}" oninput="updateSubMoment('${item.id}', '${sub.id}', 'time', this.value)" placeholder="6:37" class="w-20 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-amber-400 placeholder-slate-600 focus:outline-none focus:border-amber-500"><button onclick="moveSubMoment('${item.id}', ${subIdx}, 'up')" class="p-1 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вверх"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button><button onclick="moveSubMoment('${item.id}', ${subIdx}, 'down')" class="p-1 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вниз"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button><button onclick="deleteSubMoment('${item.id}', '${sub.id}')" class="p-1 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg transition-colors cursor-pointer" title="Удалить подпункт"><i data-lucide="x" class="w-3.5 h-3.5"></i></button></div>`;
+            });
+            subHtml += `</div>`;
+          }
+          html += `<div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2"><div class="flex items-center space-x-2"><span class="text-xs font-bold text-slate-500 font-mono w-5">${idx + 1})</span><input type="text" value="${escapeHtml(item.title)}" oninput="updateMainMoment('${item.id}', 'title', this.value)" placeholder="Название момента" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"><input type="text" value="${escapeHtml(item.time)}" oninput="updateMainMoment('${item.id}', 'time', this.value)" placeholder="3:10" class="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-amber-400 placeholder-slate-600 focus:outline-none focus:border-amber-500"><button onclick="moveMainMoment(${idx}, 'up')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вверх"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button><button onclick="moveMainMoment(${idx}, 'down')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вниз"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button><button onclick="deleteMainMoment('${item.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer" title="Удалить"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${linkPreview ? `<div class="pl-7 text-[11px] font-mono text-slate-500 flex items-center space-x-1 truncate"><span class="text-slate-600">Ссылка:</span><span class="text-slate-400 underline decoration-slate-800 truncate">${escapeHtml(linkPreview)}</span></div>` : ''}<div class="pl-7"><button onclick="addSubMoment('${item.id}')" class="inline-flex items-center space-x-1 px-2 py-1 bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-800 hover:border-slate-700 rounded-lg text-[11px] font-medium transition-all cursor-pointer"><i data-lucide="plus" class="w-3 h-3"></i><span>Добавить подпункт</span></button></div>${subHtml}</div>`;
+        });
+        html += `<div class="pt-2 flex items-center space-x-2 flex-wrap gap-2"><button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Начало</span></button><button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Момент</span></button><button onclick="addMainMoment('Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Реакция</span></button></div>`;
+        container.innerHTML = html;
+        if (window.lucide) lucide.createIcons();
+        updateOutput();
+      } catch (err) {
+        alert("Ошибка в renderMainMoments: " + err.message + "\n" + err.stack);
+      }
     }
 
     function addMainMoment(initialTitle = '', initialTime = '') {
@@ -2337,6 +2328,22 @@
       }
     }
 
+    function moveSubMoment(mainId, subIdx, dir) {
+      const item = state.mainMoments.find(m => m.id === mainId);
+      if (item && item.subMoments) {
+        if (dir === 'up' && subIdx > 0) {
+          const temp = item.subMoments[subIdx];
+          item.subMoments[subIdx] = item.subMoments[subIdx - 1];
+          item.subMoments[subIdx - 1] = temp;
+        } else if (dir === 'down' && subIdx < item.subMoments.length - 1) {
+          const temp = item.subMoments[subIdx];
+          item.subMoments[subIdx] = item.subMoments[subIdx + 1];
+          item.subMoments[subIdx + 1] = temp;
+        }
+        renderMainMoments();
+      }
+    }
+
     function deleteSubMoment(mainId, subId) {
       const item = state.mainMoments.find(m => m.id === mainId);
       if (item && item.subMoments) {
@@ -2348,106 +2355,42 @@
     // --- Extra Streams Renders & Logic ---
 
     function renderExtraStreams() {
-      const container = document.getElementById('extraStreamsList');
-      if (state.extraStreams.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950/20">
-            <p class="text-xs text-slate-500 mb-2">Дополнительные стримы не добавлены</p>
-            <button onclick="addExtraStream()" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Добавить дополнительный стрим</span>
-            </button>
-          </div>
-        `;
-        lucide.createIcons();
-        updateOutput();
-        return;
-      }
-
-      let html = '';
-      state.extraStreams.forEach((stream) => {
-        let momentsHtml = '';
-        stream.moments.forEach((item, mIdx) => {
-          let subHtml = '';
-          if (item.subMoments && item.subMoments.length > 0) {
-            subHtml = `<div class="mt-2 pl-4 space-y-2 border-l-2 border-purple-500/20">`;
-            item.subMoments.forEach((sub) => {
-              subHtml += `
-                <div class="flex items-center space-x-2">
-                  <span class="text-[11px] text-slate-500 font-mono">-</span>
-                  <input type="text" value="${escapeHtml(sub.title)}" oninput="updateExtraSubMoment('${stream.id}', '${item.id}', '${sub.id}', 'title', this.value)" placeholder="Название подпункта" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500">
-                  <input type="text" value="${escapeHtml(sub.time)}" oninput="updateExtraSubMoment('${stream.id}', '${item.id}', '${sub.id}', 'time', this.value)" placeholder="21:45" class="w-20 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-purple-300 placeholder-slate-600 focus:outline-none focus:border-purple-500">
-                  <button onclick="deleteExtraSubMoment('${stream.id}', '${item.id}', '${sub.id}')" class="p-1 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg transition-colors cursor-pointer">
-                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
-              `;
+      try {
+        const container = document.getElementById('extraStreamsList');
+        if (state.extraStreams.length === 0) {
+          container.innerHTML = `<div class="text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950/20"><p class="text-xs text-slate-500 mb-3">Дополнительные стримы не добавлены</p><button onclick="addExtraStream()" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Добавить дополнительный стрим</span></button></div>`;
+          if (window.lucide) lucide.createIcons();
+          updateOutput();
+          return;
+        }
+        let html = '';
+        state.extraStreams.forEach((stream, streamIdx) => {
+          let streamHtml = `<div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden mb-4"><div class="bg-slate-800/50 px-3 py-2 flex items-center justify-between border-b border-slate-800"><div class="flex items-center space-x-2"><i data-lucide="layers" class="w-4 h-4 text-purple-400"></i><input type="text" value="${escapeHtml(stream.title)}" oninput="updateExtraStreamHeader('${stream.id}', 'title', this.value)" placeholder="Заголовок (например: Ночной)" class="bg-transparent text-xs font-bold text-purple-300 focus:outline-none border-b border-purple-500/40 px-1 py-0.5"></div><button onclick="deleteExtraStream('${stream.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer transition-colors" title="Удалить стрим"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><div class="p-3 space-y-3"><div class="flex items-center space-x-2"><span class="text-xs text-slate-400 w-16">Ссылка:</span><input type="text" value="${escapeHtml(stream.streamUrl)}" oninput="updateExtraStreamHeader('${stream.id}', 'streamUrl', this.value)" placeholder="https://youtu.be/D4BAEt_m-LA" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500"></div><div class="space-y-2">`;
+          if (stream.moments.length === 0) {
+            streamHtml += `<p class="text-[11px] text-slate-500 italic text-center py-2">Список моментов пуст</p>`;
+          } else {
+            stream.moments.forEach((item, idx) => {
+              const linkPreview = buildTimestampLink(stream.streamUrl || state.videoId, item.time, item.videoUrlOverride);
+              let subHtml = '';
+              if (item.subMoments && item.subMoments.length > 0) {
+                subHtml = `<div class="mt-2 pl-4 space-y-2 border-l-2 border-slate-800">`;
+                item.subMoments.forEach((sub, subIdx) => {
+                  subHtml += `<div class="flex items-center space-x-2"><span class="text-[11px] text-slate-500 font-mono">-</span><input type="text" value="${escapeHtml(sub.title)}" oninput="updateExtraSubMoment('${stream.id}', '${item.id}', '${sub.id}', 'title', this.value)" placeholder="Название подпункта" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500"><input type="text" value="${escapeHtml(sub.time)}" oninput="updateExtraSubMoment('${stream.id}', '${item.id}', '${sub.id}', 'time', this.value)" placeholder="21:45" class="w-20 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-purple-300 placeholder-slate-600 focus:outline-none focus:border-purple-500"><button onclick="moveExtraSubMoment('${stream.id}', '${item.id}', ${subIdx}, 'up')" class="p-1 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вверх"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button><button onclick="moveExtraSubMoment('${stream.id}', '${item.id}', ${subIdx}, 'down')" class="p-1 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вниз"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button><button onclick="deleteExtraSubMoment('${stream.id}', '${item.id}', '${sub.id}')" class="p-1 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg transition-colors cursor-pointer" title="Удалить подпункт"><i data-lucide="x" class="w-3.5 h-3.5"></i></button></div>`;
+                });
+                subHtml += `</div>`;
+              }
+              streamHtml += `<div class="bg-slate-950/40 border border-slate-800/50 rounded-xl p-3 space-y-2"><div class="flex items-center space-x-2"><span class="text-[11px] font-bold text-slate-500 font-mono w-4">${idx + 1})</span><input type="text" value="${escapeHtml(item.title)}" oninput="updateExtraMoment('${stream.id}', '${item.id}', 'title', this.value)" placeholder="Название момента" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500"><input type="text" value="${escapeHtml(item.time)}" oninput="updateExtraMoment('${stream.id}', '${item.id}', 'time', this.value)" placeholder="0:00" class="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-purple-300 placeholder-slate-600 focus:outline-none focus:border-purple-500"><button onclick="moveExtraMoment('${stream.id}', ${idx}, 'up')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вверх"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button><button onclick="moveExtraMoment('${stream.id}', ${idx}, 'down')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вниз"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button><button onclick="deleteExtraMoment('${stream.id}', '${item.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer" title="Удалить"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${linkPreview ? `<div class="pl-6 text-[10px] font-mono text-slate-500 flex items-center space-x-1 truncate"><span class="text-slate-600">Ссылка:</span><span class="text-slate-400 underline decoration-slate-800 truncate">${escapeHtml(linkPreview)}</span></div>` : ''}<div class="pl-6"><button onclick="addExtraSubMoment('${stream.id}', '${item.id}')" class="inline-flex items-center space-x-1 px-2 py-1 bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-800 hover:border-slate-700 rounded-lg text-[10px] font-medium transition-all cursor-pointer"><i data-lucide="plus" class="w-3 h-3"></i><span>Добавить подпункт</span></button></div>${subHtml}</div>`;
             });
-            subHtml += `</div>`;
           }
-
-          momentsHtml += `
-            <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 space-y-2">
-              <div class="flex items-center space-x-2">
-                <span class="text-xs font-bold text-slate-500 font-mono w-5">${mIdx + 1})</span>
-                <input type="text" value="${escapeHtml(item.title)}" oninput="updateExtraMoment('${stream.id}', '${item.id}', 'title', this.value)" placeholder="Название момента" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500">
-                <input type="text" value="${escapeHtml(item.time)}" oninput="updateExtraMoment('${stream.id}', '${item.id}', 'time', this.value)" placeholder="0:00" class="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-purple-300 placeholder-slate-600 focus:outline-none focus:border-purple-500">
-                <button onclick="deleteExtraMoment('${stream.id}', '${item.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-              </div>
-
-              ${subHtml}
-
-              <div class="pl-7 pt-1">
-                <button onclick="addExtraSubMoment('${stream.id}', '${item.id}')" class="text-[11px] text-purple-400 hover:text-purple-300 flex items-center space-x-1 cursor-pointer">
-                  <i data-lucide="plus" class="w-3 h-3"></i>
-                  <span>Добавить подпункт</span>
-                </button>
-              </div>
-            </div>
-          `;
+          streamHtml += `</div><div class="pt-2 flex items-center space-x-2"><button onclick="addExtraMoment('${stream.id}')" class="inline-flex items-center space-x-1 px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-[11px] font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3 h-3"></i><span>Добавить момент</span></button></div></div></div>`;
+          html += streamHtml;
         });
-
-        html += `
-          <div class="bg-slate-950/60 border border-purple-500/20 rounded-xl p-4 space-y-3">
-            <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
-              <input type="text" value="${escapeHtml(stream.title)}" oninput="updateExtraStreamHeader('${stream.id}', 'title', this.value)" placeholder="Заголовок (например: Ночной)" class="bg-transparent text-xs font-bold text-purple-300 focus:outline-none border-b border-purple-500/40 px-1 py-0.5">
-              <button onclick="deleteExtraStream('${stream.id}')" class="text-xs text-red-400 hover:text-red-300 flex items-center space-x-1 cursor-pointer">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                <span>Удалить блок</span>
-              </button>
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-medium text-slate-400 mb-1">Ссылка на стрим</label>
-              <input type="text" value="${escapeHtml(stream.streamUrl)}" oninput="updateExtraStreamHeader('${stream.id}', 'streamUrl', this.value)" placeholder="https://youtu.be/D4BAEt_m-LA" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500">
-            </div>
-
-            <div class="space-y-2">
-              <label class="block text-[11px] font-medium text-slate-400">Моменты в этом стриме:</label>
-              ${momentsHtml || `<p class="text-xs text-slate-600 italic">Нет моментов</p>`}
-            </div>
-
-            <div class="flex items-center space-x-1.5 flex-wrap gap-1.5 pt-1">
-              <button onclick="addExtraMoment('${stream.id}', 'Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка рассказывает истории 00:00'">
-                <i data-lucide="plus" class="w-3 h-3"></i>
-                <span>Начало</span>
-              </button>
-              <button onclick="addExtraMoment('${stream.id}', '')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить момент">
-                <i data-lucide="plus" class="w-3 h-3"></i>
-                <span>Момент</span>
-              </button>
-              <button onclick="addExtraMoment('${stream.id}', 'Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка смотрит &quot;&quot;'">
-                <i data-lucide="plus" class="w-3 h-3"></i>
-                <span>Реакция</span>
-              </button>
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-      lucide.createIcons();
-      updateOutput();
+        container.innerHTML = html;
+        if (window.lucide) lucide.createIcons();
+        updateOutput();
+      } catch (err) {
+        alert("Ошибка в renderExtraStreams: " + err.message + "\n" + err.stack);
+      }
     }
 
     function addExtraStream() {
@@ -2522,6 +2465,25 @@
             sub[key] = val;
             updateOutput();
           }
+        }
+      }
+    }
+
+    function moveExtraSubMoment(streamId, momentId, subIdx, dir) {
+      const st = state.extraStreams.find(s => s.id === streamId);
+      if (st) {
+        const m = st.moments.find(item => item.id === momentId);
+        if (m && m.subMoments) {
+          if (dir === 'up' && subIdx > 0) {
+            const temp = m.subMoments[subIdx];
+            m.subMoments[subIdx] = m.subMoments[subIdx - 1];
+            m.subMoments[subIdx - 1] = temp;
+          } else if (dir === 'down' && subIdx < m.subMoments.length - 1) {
+            const temp = m.subMoments[subIdx];
+            m.subMoments[subIdx] = m.subMoments[subIdx + 1];
+            m.subMoments[subIdx + 1] = temp;
+          }
+          renderExtraStreams();
         }
       }
     }
@@ -3333,6 +3295,7 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
         state.mainMoments = [];
         state.extraStreams = [];
         state.activeSeekTime = null;
+        state.excludedAutoHashtags = [];
 
         document.getElementById('streamDate').value = '';
         document.getElementById('mainTitle').value = 'Основной';
