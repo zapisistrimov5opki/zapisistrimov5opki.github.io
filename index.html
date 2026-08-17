@@ -230,17 +230,17 @@
               </h2>
             </div>
             <div class="flex items-center space-x-1.5 flex-wrap gap-1">
-              <button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка рассказывает истории 00:00'">
-                <i data-lucide="plus" class="w-3 h-3"></i>
+              <button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить Начало (Пятёрка рассказывает истории 00:00)">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i>
                 <span>Начало</span>
               </button>
-              <button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить момент">
-                <i data-lucide="plus" class="w-3 h-3"></i>
-                <span>Момент</span>
-              </button>
-              <button onclick="addMainMoment('Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить 'Пятёрка смотрит &quot;&quot;'">
-                <i data-lucide="plus" class="w-3 h-3"></i>
+              <button onclick="addMainMoment('Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить Реакцию (Пятёрка смотрит...)">
+                <i data-lucide="tv" class="w-3.5 h-3.5"></i>
                 <span>Реакция</span>
+              </button>
+              <button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить момент">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Момент</span>
               </button>
               <button onclick="toggleWindowMinimize('mainStreamCard')" class="w-7 h-7 flex items-center justify-center rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer ml-1" title="Свернуть / Развернуть окно" id="btn-minimize-mainStreamCard">
                 <i data-lucide="chevron-up" class="w-4 h-4 transition-transform duration-200"></i>
@@ -368,7 +368,7 @@
                 <div class="flex items-center space-x-3">
                   <span>Символов: <strong id="charCount" class="text-slate-300">0</strong></span>
                   <a id="externalOpenLink" href="#" target="_blank" rel="noreferrer" class="hidden inline-flex items-center space-x-1 text-amber-400/80 hover:text-amber-300 transition-colors">
-                    <span id="externalOpenLabel">Открыть</span>
+                    
                     <i data-lucide="external-link" class="w-3 h-3"></i>
                   </a>
                 </div>
@@ -388,7 +388,7 @@
             </div>
             <!-- Tab 2: Players (Hidden by default, shown when Player tab clicked) -->
             <div id="tabContentPlayers" class="hidden space-y-4">
-              <div id="allPlayersContainer" class="space-y-4"></div>
+              <div id="allPlayersContainer" class="flex flex-col gap-4"></div>
             </div>
           </div>
         </div>
@@ -612,7 +612,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-slate-100">Настройки приложения</h3>
-            <p class="text-[10px] text-slate-400">Параметры импорта, подбора хэштегов и автоматизации</p>
+            <p class="text-[10px] text-slate-400">Параметры плеера, автоматизация, хэштеги и горячие клавиши</p>
           </div>
         </div>
         <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer" title="Закрыть (Esc)">
@@ -620,9 +620,53 @@
         </button>
       </div>
 
-      <!-- Modal Content (Scrollable) -->
-      <div class="p-6 space-y-5 overflow-y-auto custom-scrollbar">
-        <!-- Setting Item 2: Auto hashtags toggle -->
+      <!-- Settings Tabs Navigation Header -->
+      <div class="flex items-center border-b border-slate-800 px-6 bg-slate-950/40 shrink-0 gap-1 overflow-x-auto custom-scrollbar">
+        <button 
+          id="tabBtnSettingsGeneral"
+          onclick="switchSettingsTab('general')" 
+          class="px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer border-amber-500 text-amber-400 flex items-center space-x-2 shrink-0"
+        >
+          <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+          <span>Основные</span>
+        </button>
+        <button 
+          id="tabBtnSettingsHashtags"
+          onclick="switchSettingsTab('hashtags')" 
+          class="px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 shrink-0"
+        >
+          <i data-lucide="hash" class="w-3.5 h-3.5"></i>
+          <span>Менеджер хэштегов</span>
+        </button>
+        <button 
+          id="tabBtnSettingsShortcuts"
+          onclick="switchSettingsTab('shortcuts')" 
+          class="px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 shrink-0"
+        >
+          <i data-lucide="keyboard" class="w-3.5 h-3.5"></i>
+          <span>Горячие клавиши</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: Основные (General) -->
+      <div id="tabContentSettingsGeneral" class="p-6 space-y-5 overflow-y-auto custom-scrollbar">
+        <!-- Setting 1: Auto-time for Main Stream moments -->
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
+          <div class="space-y-1">
+            <label for="autoTimeMainToggle" class="text-xs font-semibold text-slate-200 block cursor-pointer">
+              Авто-добавление времени в Основном стриме
+            </label>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              При нажатии «Момент» в окне основного стрима автоматически подставлять текущий таймкод с плеера
+            </p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" id="autoTimeMainToggle" class="sr-only peer" onchange="toggleAutoTimeInMainStream(this.checked)">
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+        </div>
+
+        <!-- Setting 2: Auto hashtags toggle -->
         <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
           <div class="space-y-1">
             <div class="flex items-center space-x-2">
@@ -641,13 +685,31 @@
           </label>
         </div>
 
-        <!-- Setting Item 3: Hashtags Rule Manager -->
-        <div class="space-y-3 pt-2 border-t border-slate-800/80">
+        <!-- Setting 3: Show/Hide Walking Cat -->
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
+          <div class="space-y-1">
+            <label for="showCatToggle" class="text-xs font-semibold text-slate-200 block cursor-pointer">
+              Показывать анимированного котика
+            </label>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              Белый анимированный пиксельный котик в самом низу страницы
+            </p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" id="showCatToggle" class="sr-only peer" onchange="toggleShowCat(this.checked)">
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- TAB 2: Менеджер хэштегов (Hashtags) -->
+      <div id="tabContentSettingsHashtags" class="p-6 space-y-4 overflow-y-auto custom-scrollbar hidden">
+        <div class="space-y-3">
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
               <h4 class="text-xs font-bold text-slate-200 flex items-center space-x-1.5">
                 <i data-lucide="hash" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span>Менеджер хэштегов</span>
+                <span>Правила автоподбора хэштегов</span>
                 <span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase">BETA</span>
               </h4>
               <p class="text-[10px] text-slate-400 mt-0.5">Ключевые слова или синонимы (через запятую) в названиях определяют хэштеги</p>
@@ -698,6 +760,117 @@
 
           <!-- Rules List Container -->
           <div id="hashtagRulesList" class="space-y-1.5 max-h-56 overflow-y-auto pr-1 custom-scrollbar"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Горячие клавиши (Shortcuts) -->
+      <div id="tabContentSettingsShortcuts" class="p-6 space-y-4 overflow-y-auto custom-scrollbar hidden">
+        <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-xl flex items-center space-x-2.5">
+          <div class="p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Быстрые клавиши работают при активном окне приложения (когда фокус не находится в поле ввода текста).
+          </p>
+        </div>
+
+        <!-- Section 1: Navigation & Playback -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+            <span>Плеер и навигация</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-300 font-medium">Переключение ускорения</span>
+              <div class="flex items-center space-x-1">
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">2</kbd>
+                <span class="text-slate-500">или</span>
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">X</kbd>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Quick Moments -->
+        <div class="space-y-2 pt-2 border-t border-slate-800/80">
+          <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+            <span>Быстрое добавление моментов</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-300 font-medium">Добавить «Момент»</span>
+              <div class="flex items-center space-x-1">
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Shift</kbd>
+                <span class="text-slate-500">+</span>
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">M</kbd>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-300 font-medium">Добавить «Начало» (00:00)</span>
+              <div class="flex items-center space-x-1">
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Shift</kbd>
+                <span class="text-slate-500">+</span>
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">S</kbd>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-300 font-medium">Добавить «Реакцию»</span>
+              <div class="flex items-center space-x-1">
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Shift</kbd>
+                <span class="text-slate-500">+</span>
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">R</kbd>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-300 font-medium">Фокус на Блокнот</span>
+              <div class="flex items-center space-x-1">
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Shift</kbd>
+                <span class="text-slate-500">+</span>
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">N</kbd>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: System Shortcuts -->
+        <div class="space-y-2 pt-2 border-t border-slate-800/80">
+          <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="command" class="w-3.5 h-3.5"></i>
+            <span>Системные горячие клавиши</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-300 font-medium">Скопировать итоговый текст</span>
+              <div class="flex items-center space-x-1">
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Ctrl</kbd>
+                <span class="text-slate-500">+</span>
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Enter</kbd>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between">
+              <span class="text-slate-300 font-medium">Открыть Настройки</span>
+              <div class="flex items-center space-x-1">
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Ctrl</kbd>
+                <span class="text-slate-500">+</span>
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Shift</kbd>
+                <span class="text-slate-500">+</span>
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">S</kbd>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between sm:col-span-2">
+              <span class="text-slate-300 font-medium">Закрыть окно / сбросить фокус</span>
+              <div class="flex items-center space-x-1">
+                <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[11px] font-mono text-amber-300 font-bold">Esc</kbd>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -920,6 +1093,12 @@
       } catch (e) {}
     }
 
+    const savedAutoTime = localStorage.getItem('autoTimeInMainStream');
+    const autoTimeInMainStreamVal = savedAutoTime === null ? true : savedAutoTime === 'true';
+
+    const savedShowCat = localStorage.getItem('showCat');
+    const showCatVal = savedShowCat === null ? true : savedShowCat === 'true';
+
     let state = {
       streamDate: '',
       mainTitle: 'Основной',
@@ -929,8 +1108,12 @@
       extraStreams: [],
       activePlayerStreamId: 'all',
       activeSeekTimes: {},
+      streamSpeeds: {},
       playerViewMode: 'phone',
       autoHashtags: autoHashtagsVal,
+      autoTimeInMainStream: autoTimeInMainStreamVal,
+      showCat: showCatVal,
+      speedMultiplier: 2,
       hashtagRules: hashtagRulesVal,
       excludedAutoHashtags: [],
       outputFormat: localStorage.getItem('outputFormat') || 'default'
@@ -1540,11 +1723,11 @@
       document.getElementById('charCount').innerText = text.length;
 
       const link = document.getElementById('externalOpenLink');
-      const label = document.getElementById('externalOpenLabel');
+      
       if (state.videoId.trim()) {
         const platform = detectPlatform(state.videoId);
         const platformLabel = platform === 'youtube' ? 'YouTube' : platform === 'twitch' ? 'Twitch' : platform === 'kick' ? 'Kick' : platform === 'vk_live' ? 'VK Live' : platform === 'vk' ? 'VK Видео' : 'Платформе';
-        label.innerText = `Открыть на ${platformLabel}`;
+        link.title = `Открыть на ${platformLabel}`;
         link.href = buildTimestampLink(state.videoId, '');
         link.classList.remove('hidden');
       } else {
@@ -1624,6 +1807,36 @@
       });
     }
 
+    function applyStreamPlaybackSpeed(streamId, speed) {
+      if (speed === undefined || speed === null) return;
+      const cardEl = document.getElementById(`player-card-${streamId}`);
+      if (!cardEl) return;
+
+      const iframe = cardEl.querySelector('iframe');
+      if (iframe) {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'setPlaybackRate',
+            args: [speed]
+          }), '*');
+        } catch (e) {}
+
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          if (doc) {
+            const vids = doc.querySelectorAll('video');
+            vids.forEach(v => { v.playbackRate = speed; });
+          }
+        } catch (e) {}
+      }
+
+      try {
+        const localVids = cardEl.querySelectorAll('video');
+        localVids.forEach(v => { v.playbackRate = speed; });
+      } catch (e) {}
+    }
+
     function seekToStreamTime(streamId, secs) {
       state.activeSeekTimes[streamId] = secs;
       updateStreamCurrentTimeUI(streamId, secs);
@@ -1651,10 +1864,46 @@
                   args: [secs, true]
                 }), '*');
               } catch (e) {}
+
+              const speed = (state.streamSpeeds && state.streamSpeeds[streamId]) !== undefined ? state.streamSpeeds[streamId] : 1;
+              if (speed !== 1) {
+                // Retry applying speed as iframe reloads
+                [100, 400, 900, 1500].forEach(delay => {
+                  setTimeout(() => applyStreamPlaybackSpeed(streamId, speed), delay);
+                });
+              }
             }
           }
         }
       }, 10);
+    }
+
+    function toggleStreamSpeed2x(streamId) {
+      if (!state.streamSpeeds) state.streamSpeeds = {};
+      const current = state.streamSpeeds[streamId] || 1;
+      const newSpeed = current === 2 ? 1 : 2;
+
+      state.streamSpeeds[streamId] = newSpeed;
+
+      applyStreamPlaybackSpeed(streamId, newSpeed);
+      [200, 600, 1200].forEach(delay => {
+        setTimeout(() => applyStreamPlaybackSpeed(streamId, newSpeed), delay);
+      });
+
+      const cardEl = document.getElementById(`player-card-${streamId}`);
+      if (cardEl) {
+        const btn = cardEl.querySelector('.speed-2x-btn');
+        if (btn) {
+          const isSpeedActive = newSpeed === 2;
+          btn.textContent = '2x';
+          btn.title = isSpeedActive ? 'Ускорение 2x (включено)' : 'Ускорение 2x';
+          if (isSpeedActive) {
+            btn.className = "speed-2x-btn px-3.5 py-1.5 rounded-full font-mono text-sm transition-all cursor-pointer shadow-lg active:scale-95 bg-amber-400 text-slate-950 border-2 border-amber-400 font-extrabold shadow-amber-400/30";
+          } else {
+            btn.className = "speed-2x-btn px-3.5 py-1.5 rounded-full font-mono text-sm transition-all cursor-pointer shadow-lg active:scale-95 bg-slate-950 text-amber-400 border-2 border-amber-400 hover:bg-amber-500/10 shadow-amber-500/10 font-bold";
+          }
+        }
+      }
     }
 
     function adjustStreamSeekTime(streamId, deltaSecs) {
@@ -1694,6 +1943,36 @@
           });
           renderExtraStreams();
           showToast(`Момент (${timeStr}) добавлен в ${extra.title || 'доп. стрим'}!`);
+        }
+      }
+    }
+
+    function addCurrentTimeStart(streamId) {
+      const secs = state.activeSeekTimes[streamId] || 0;
+      const timeStr = formatSecondsToHHMMSS(secs);
+
+      if (streamId === 'main') {
+        state.mainMoments.push({
+          id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
+          title: 'Пятёрка рассказывает истории',
+          time: timeStr,
+          videoUrlOverride: '',
+          subMoments: []
+        });
+        renderMainMoments();
+        showToast(`Начало (${timeStr}) добавлено!`);
+      } else {
+        const extra = state.extraStreams.find(s => s.id === streamId);
+        if (extra) {
+          extra.moments.push({
+            id: 'em_' + Date.now() + Math.random().toString(36).substr(2, 4),
+            title: 'Пятёрка рассказывает истории',
+            time: timeStr,
+            videoUrlOverride: '',
+            subMoments: []
+          });
+          renderExtraStreams();
+          showToast(`Начало (${timeStr}) добавлено в ${extra.title || 'доп. стрим'}!`);
         }
       }
     }
@@ -1761,6 +2040,33 @@
     function escapeHtml(str) {
       if (!str) return '';
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+    function movePlayer(streamId, direction) {
+      if (!state.playerOrder) state.playerOrder = [];
+      const currentStreamIds = ['main'];
+      state.extraStreams.forEach(s => {
+        if (s.streamUrl && s.streamUrl.trim()) currentStreamIds.push(s.id);
+      });
+      
+      currentStreamIds.forEach(id => {
+        if (!state.playerOrder.includes(id)) state.playerOrder.push(id);
+      });
+      state.playerOrder = state.playerOrder.filter(id => currentStreamIds.includes(id));
+      
+      const idx = state.playerOrder.indexOf(streamId);
+      if (idx === -1) return;
+      
+      if (direction === 'up' && idx > 0) {
+        const temp = state.playerOrder[idx - 1];
+        state.playerOrder[idx - 1] = state.playerOrder[idx];
+        state.playerOrder[idx] = temp;
+      } else if (direction === 'down' && idx < state.playerOrder.length - 1) {
+        const temp = state.playerOrder[idx + 1];
+        state.playerOrder[idx + 1] = state.playerOrder[idx];
+        state.playerOrder[idx] = temp;
+      }
+      
+      updatePlayerTab();
     }
 
     function updatePlayerTab() {
@@ -1947,7 +2253,7 @@
           `;
         }
 
-        const headerKey = `${totalPlayersCount}_${cardTitle}_${embedInfo ? embedInfo.platform : ''}`;
+        const headerKey = `${totalPlayersCount}_${cardTitle}_${embedInfo ? embedInfo.platform : ''}_${state.activePlayerStreamId === 'all'}`;
         const headerSlot = cardEl.querySelector('.player-header-slot');
         if (headerSlot && headerSlot.getAttribute('data-header-key') !== headerKey) {
           headerSlot.setAttribute('data-header-key', headerKey);
@@ -2046,16 +2352,19 @@
         if (controlsSlot) {
           if (stream.url) {
             const formattedCurrent = formatSecondsToHHMMSS(seekSecs || 0);
-            const controlsKey = `${stream.url}_${seekSecs}`;
+            const currentSpeed = (state.streamSpeeds && state.streamSpeeds[stream.id]) !== undefined ? state.streamSpeeds[stream.id] : 1;
+            const controlsKey = `${stream.url}_${seekSecs}_${currentSpeed}`;
 
             if (controlsSlot.getAttribute('data-controls-key') !== controlsKey) {
               controlsSlot.setAttribute('data-controls-key', controlsKey);
+              const isSpeedActive = currentSpeed === 2;
+
               controlsSlot.innerHTML = `
                 <div class="pt-1">
-                  <!-- Main Controls Row without dark outer box -->
+                  <!-- Main Controls Row -->
                   <div class="flex items-center justify-between w-full gap-2">
-                    <!-- Left: Time input window pill -->
-                    <div>
+                    <!-- Left: Time input window pill + speed button right next to it -->
+                    <div class="flex items-center space-x-2 shrink-0">
                       <input 
                         type="text" 
                         value="${formattedCurrent}" 
@@ -2064,28 +2373,41 @@
                         class="frame-time-input w-24 bg-slate-950 border-2 border-amber-400 text-amber-400 font-mono font-bold text-sm rounded-full px-3 py-1.5 text-center focus:outline-none focus:border-amber-300 focus:ring-2 focus:ring-amber-400/50 shadow-lg shadow-amber-500/10"
                         title="Введите таймкод и нажмите Enter"
                       />
+
+                      <button 
+                        onclick="toggleStreamSpeed2x('${stream.id}')"
+                        class="speed-2x-btn px-3.5 py-1.5 rounded-full font-mono text-sm transition-all cursor-pointer shadow-lg active:scale-95 ${isSpeedActive ? 'bg-amber-400 text-slate-950 border-2 border-amber-400 font-extrabold shadow-amber-400/30' : 'bg-slate-950 text-amber-400 border-2 border-amber-400 hover:bg-amber-500/10 shadow-amber-500/10 font-bold'}"
+                        title="${isSpeedActive ? 'Ускорение 2x (включено)' : 'Ускорение 2x'}"
+                      >2x</button>
                     </div>
 
-                    <!-- Right: + Реакция and + Момент buttons -->
-                    <div class="flex items-center space-x-2 shrink-0">
-                      <!-- Purple Reaction (+ Реакция) button -->
+                    <!-- Right: Quick add buttons (Icon only) -->
+                    <div class="flex items-center space-x-1.5 shrink-0">
+                      <!-- Emerald Start button -->
                       <button 
-                        onclick="addCurrentTimeReaction('${stream.id}')" 
-                        class="inline-flex items-center space-x-1 px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 active:scale-95 text-white rounded-full font-bold text-xs shadow-md shadow-purple-600/30 transition-all cursor-pointer" 
-                        title="Добавить как Реакцию (Пятёрка смотрит...)"
+                        onclick="addCurrentTimeStart('${stream.id}')" 
+                        class="inline-flex items-center justify-center p-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-full shadow-md shadow-emerald-600/30 transition-all cursor-pointer" 
+                        title="Начало стрима (Пятёрка рассказывает истории)"
                       >
-                        <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[3]"></i>
-                        <span>Реакция</span>
+                        <i data-lucide="play" class="w-4 h-4"></i>
                       </button>
 
-                      <!-- Yellow Moment (+ Момент) button -->
+                      <!-- Purple Reaction button -->
+                      <button 
+                        onclick="addCurrentTimeReaction('${stream.id}')" 
+                        class="inline-flex items-center justify-center p-2 bg-purple-600 hover:bg-purple-500 active:scale-95 text-white rounded-full shadow-md shadow-purple-600/30 transition-all cursor-pointer" 
+                        title="Реакция (Пятёрка смотрит...)"
+                      >
+                        <i data-lucide="tv" class="w-4 h-4"></i>
+                      </button>
+
+                      <!-- Yellow Moment button -->
                       <button 
                         onclick="addCurrentTimeMoment('${stream.id}')" 
-                        class="inline-flex items-center space-x-1 px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 rounded-full font-extrabold text-xs shadow-md shadow-amber-400/30 transition-all cursor-pointer" 
+                        class="inline-flex items-center justify-center p-2 bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 rounded-full shadow-md shadow-amber-400/30 transition-all cursor-pointer" 
                         title="Быстро добавить этот таймкод в моменты"
                       >
-                        <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[3]"></i>
-                        <span>Момент</span>
+                        <i data-lucide="plus" class="w-4 h-4 stroke-[3]"></i>
                       </button>
                     </div>
                   </div>
@@ -2244,7 +2566,7 @@
       try {
         const container = document.getElementById('mainMomentsList');
         if (state.mainMoments.length === 0) {
-          container.innerHTML = `<div class="text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950/20"><p class="text-xs text-slate-500 mb-3">Основной список моментов пуст</p><div class="flex items-center justify-center space-x-2 flex-wrap gap-2"><button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Добавить начало стрима</span></button></div></div>`;
+          container.innerHTML = `<div class="text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950/20"><p class="text-xs text-slate-500 mb-3">Основной список моментов пуст</p><div class="flex items-center justify-center space-x-2 flex-wrap gap-2"><button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="play" class="w-3.5 h-3.5"></i><span>Добавить начало стрима</span></button></div></div>`;
           if (window.lucide) lucide.createIcons();
           updateOutput();
           return;
@@ -2262,7 +2584,7 @@
           }
           html += `<div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2"><div class="flex items-center space-x-2"><span class="text-xs font-bold text-slate-500 font-mono w-5">${idx + 1})</span><input type="text" value="${escapeHtml(item.title)}" oninput="updateMainMoment('${item.id}', 'title', this.value)" placeholder="Название момента" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"><input type="text" value="${escapeHtml(item.time)}" oninput="updateMainMoment('${item.id}', 'time', this.value)" placeholder="3:10" class="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-amber-400 placeholder-slate-600 focus:outline-none focus:border-amber-500"><button onclick="moveMainMoment(${idx}, 'up')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вверх"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button><button onclick="moveMainMoment(${idx}, 'down')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вниз"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button><button onclick="deleteMainMoment('${item.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer" title="Удалить"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${linkPreview ? `<div class="pl-7 text-[11px] font-mono text-slate-500 flex items-center space-x-1 truncate"><span class="text-slate-600">Ссылка:</span><span class="text-slate-400 underline decoration-slate-800 truncate">${escapeHtml(linkPreview)}</span></div>` : ''}<div class="pl-7"><button onclick="addSubMoment('${item.id}')" class="inline-flex items-center space-x-1 px-2 py-1 bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-800 hover:border-slate-700 rounded-lg text-[11px] font-medium transition-all cursor-pointer"><i data-lucide="plus" class="w-3 h-3"></i><span>Добавить подпункт</span></button></div>${subHtml}</div>`;
         });
-        html += `<div class="pt-2 flex items-center space-x-2 flex-wrap gap-2"><button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Начало</span></button><button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Момент</span></button><button onclick="addMainMoment('Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Реакция</span></button></div>`;
+        html += `<div class="pt-2 flex items-center space-x-2 flex-wrap gap-2"><button onclick="addMainMoment('Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Начало (Пятёрка рассказывает истории 00:00)"><i data-lucide="play" class="w-3.5 h-3.5"></i><span>Начало</span></button><button onclick="addMainMoment('Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Реакция (Пятёрка смотрит)"><i data-lucide="tv" class="w-3.5 h-3.5"></i><span>Реакция</span></button><button onclick="addMainMoment('')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить момент"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Момент</span></button></div>`;
         container.innerHTML = html;
         if (window.lucide) lucide.createIcons();
         updateOutput();
@@ -2272,6 +2594,12 @@
     }
 
     function addMainMoment(initialTitle = '', initialTime = '') {
+      if (!initialTime && state.autoTimeInMainStream !== false) {
+        const curSecs = state.activeSeekTimes['main'] || 0;
+        if (curSecs >= 0) {
+          initialTime = formatSecondsToHHMMSS(curSecs);
+        }
+      }
       state.mainMoments.push({
         id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
         title: initialTitle,
@@ -2365,7 +2693,7 @@
         }
         let html = '';
         state.extraStreams.forEach((stream, streamIdx) => {
-          let streamHtml = `<div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden mb-4"><div class="bg-slate-800/50 px-3 py-2 flex items-center justify-between border-b border-slate-800"><div class="flex items-center space-x-2"><i data-lucide="layers" class="w-4 h-4 text-purple-400"></i><input type="text" value="${escapeHtml(stream.title)}" oninput="updateExtraStreamHeader('${stream.id}', 'title', this.value)" placeholder="Заголовок (например: Ночной)" class="bg-transparent text-xs font-bold text-purple-300 focus:outline-none border-b border-purple-500/40 px-1 py-0.5"></div><button onclick="deleteExtraStream('${stream.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer transition-colors" title="Удалить стрим"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><div class="p-3 space-y-3"><div class="flex items-center space-x-2"><span class="text-xs text-slate-400 w-16">Ссылка:</span><input type="text" value="${escapeHtml(stream.streamUrl)}" oninput="updateExtraStreamHeader('${stream.id}', 'streamUrl', this.value)" placeholder="https://youtu.be/D4BAEt_m-LA" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500"></div><div class="space-y-2">`;
+          let streamHtml = `<div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden mb-4"><div class="bg-slate-800/50 px-3 py-2 flex items-center justify-between border-b border-slate-800"><div class="flex items-center space-x-2"><i data-lucide="layers" class="w-4 h-4 text-purple-400"></i><input type="text" value="${escapeHtml(stream.title)}" oninput="updateExtraStreamHeader('${stream.id}', 'title', this.value)" placeholder="Заголовок (например: Ночной)" class="bg-transparent text-xs font-bold text-purple-300 focus:outline-none border-b border-purple-500/40 px-1 py-0.5"></div><div class="flex items-center space-x-2"><button onclick="addExtraMoment('${stream.id}', 'Пятёрка рассказывает истории', '00:00')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Начало (Пятёрка рассказывает истории 00:00)"><i data-lucide="play" class="w-3.5 h-3.5"></i><span>Начало</span></button><button onclick="addExtraMoment('${stream.id}', 'Пятёрка смотрит &quot;&quot;')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Реакция (Пятёрка смотрит)"><i data-lucide="tv" class="w-3.5 h-3.5"></i><span>Реакция</span></button><button onclick="addExtraMoment('${stream.id}')" class="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer" title="Добавить момент"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Момент</span></button><button onclick="deleteExtraStream('${stream.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer transition-colors" title="Удалить стрим"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div><div class="p-3 space-y-3"><div class="flex items-center space-x-2"><span class="text-xs text-slate-400 w-16">Ссылка:</span><input type="text" value="${escapeHtml(stream.streamUrl)}" oninput="updateExtraStreamHeader('${stream.id}', 'streamUrl', this.value)" placeholder="https://youtu.be/D4BAEt_m-LA" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500"></div><div class="space-y-2">`;
           if (stream.moments.length === 0) {
             streamHtml += `<p class="text-[11px] text-slate-500 italic text-center py-2">Список моментов пуст</p>`;
           } else {
@@ -2382,7 +2710,7 @@
               streamHtml += `<div class="bg-slate-950/40 border border-slate-800/50 rounded-xl p-3 space-y-2"><div class="flex items-center space-x-2"><span class="text-[11px] font-bold text-slate-500 font-mono w-4">${idx + 1})</span><input type="text" value="${escapeHtml(item.title)}" oninput="updateExtraMoment('${stream.id}', '${item.id}', 'title', this.value)" placeholder="Название момента" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-purple-500"><input type="text" value="${escapeHtml(item.time)}" oninput="updateExtraMoment('${stream.id}', '${item.id}', 'time', this.value)" placeholder="0:00" class="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-purple-300 placeholder-slate-600 focus:outline-none focus:border-purple-500"><button onclick="moveExtraMoment('${stream.id}', ${idx}, 'up')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вверх"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button><button onclick="moveExtraMoment('${stream.id}', ${idx}, 'down')" class="p-1.5 hover:bg-slate-800 text-slate-400 rounded-lg cursor-pointer" title="Вниз"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button><button onclick="deleteExtraMoment('${stream.id}', '${item.id}')" class="p-1.5 hover:bg-red-950/50 text-slate-500 hover:text-red-400 rounded-lg cursor-pointer" title="Удалить"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${linkPreview ? `<div class="pl-6 text-[10px] font-mono text-slate-500 flex items-center space-x-1 truncate"><span class="text-slate-600">Ссылка:</span><span class="text-slate-400 underline decoration-slate-800 truncate">${escapeHtml(linkPreview)}</span></div>` : ''}<div class="pl-6"><button onclick="addExtraSubMoment('${stream.id}', '${item.id}')" class="inline-flex items-center space-x-1 px-2 py-1 bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-800 hover:border-slate-700 rounded-lg text-[10px] font-medium transition-all cursor-pointer"><i data-lucide="plus" class="w-3 h-3"></i><span>Добавить подпункт</span></button></div>${subHtml}</div>`;
             });
           }
-          streamHtml += `</div><div class="pt-2 flex items-center space-x-2"><button onclick="addExtraMoment('${stream.id}')" class="inline-flex items-center space-x-1 px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-[11px] font-semibold transition-all cursor-pointer"><i data-lucide="plus" class="w-3 h-3"></i><span>Добавить момент</span></button></div></div></div>`;
+          streamHtml += `</div></div></div>`;
           html += streamHtml;
         });
         container.innerHTML = html;
@@ -2501,13 +2829,82 @@
 
     // --- Settings Engine ---
 
+    function switchSettingsTab(tabName) {
+      const btnGeneral = document.getElementById('tabBtnSettingsGeneral');
+      const btnHashtags = document.getElementById('tabBtnSettingsHashtags');
+      const btnShortcuts = document.getElementById('tabBtnSettingsShortcuts');
+
+      const contentGeneral = document.getElementById('tabContentSettingsGeneral');
+      const contentHashtags = document.getElementById('tabContentSettingsHashtags');
+      const contentShortcuts = document.getElementById('tabContentSettingsShortcuts');
+
+      if (!btnGeneral || !btnShortcuts || !contentGeneral || !contentShortcuts) return;
+
+      const activeBtnClass = 'px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer border-amber-500 text-amber-400 flex items-center space-x-2 shrink-0';
+      const inactiveBtnClass = 'px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 shrink-0';
+
+      contentGeneral.classList.add('hidden');
+      if (contentHashtags) contentHashtags.classList.add('hidden');
+      contentShortcuts.classList.add('hidden');
+
+      btnGeneral.className = inactiveBtnClass;
+      if (btnHashtags) btnHashtags.className = inactiveBtnClass;
+      btnShortcuts.className = inactiveBtnClass;
+
+      if (tabName === 'hashtags' && contentHashtags) {
+        contentHashtags.classList.remove('hidden');
+        if (btnHashtags) btnHashtags.className = activeBtnClass;
+      } else if (tabName === 'shortcuts') {
+        contentShortcuts.classList.remove('hidden');
+        btnShortcuts.className = activeBtnClass;
+      } else {
+        contentGeneral.classList.remove('hidden');
+        btnGeneral.className = activeBtnClass;
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleAutoTimeInMainStream(checked) {
+      state.autoTimeInMainStream = checked;
+      localStorage.setItem('autoTimeInMainStream', checked);
+      showToast(checked ? 'Авто-время в основном стриме включено' : 'Авто-время в основном стриме выключено');
+    }
+
+    function toggleShowCat(checked) {
+      state.showCat = checked;
+      localStorage.setItem('showCat', checked);
+      updateCatVisibility();
+      showToast(checked ? 'Котик включён 🐾' : 'Котик отключён');
+    }
+
+    function updateCatVisibility() {
+      const track = document.getElementById('catTrack');
+      if (track) {
+        if (state.showCat !== false) {
+          track.classList.remove('hidden');
+        } else {
+          track.classList.add('hidden');
+        }
+      }
+    }
+
     function openSettingsModal() {
       const modal = document.getElementById('settingsModal');
       const box = document.getElementById('settingsModalBox');
       if (!modal || !box) return;
 
+      // Reset to General tab
+      switchSettingsTab('general');
+
       const tagToggle = document.getElementById('autoHashtagsToggle');
       if (tagToggle) tagToggle.checked = !!state.autoHashtags;
+
+      const timeToggle = document.getElementById('autoTimeMainToggle');
+      if (timeToggle) timeToggle.checked = state.autoTimeInMainStream !== false;
+
+      const catToggle = document.getElementById('showCatToggle');
+      if (catToggle) catToggle.checked = state.showCat !== false;
 
       renderHashtagRulesInSettings();
 
@@ -3051,33 +3448,9 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
       showToast('Запись и моменты успешно импортированы!');
     }
 
-    // --- Notepad (Блокнот заметок) ---
-    function setCookie(name, value, days = 365) {
-      try {
-        const d = new Date();
-        d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + d.toUTCString();
-        document.cookie = name + "=" + encodeURIComponent(value || "") + ";" + expires + ";path=/;SameSite=Lax";
-      } catch(e) {}
-    }
-
-    function getCookie(name) {
-      try {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-          let c = ca[i].trim();
-          if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length));
-        }
-      } catch(e) {}
-      return null;
-    }
-
     function loadNotepadContent() {
       const fromLS = localStorage.getItem('notepad_content');
-      const fromCookie = getCookie('notepad_content');
       if (fromLS !== null && fromLS !== undefined && fromLS !== '') return fromLS;
-      if (fromCookie !== null && fromCookie !== undefined && fromCookie !== '') return fromCookie;
       return '';
     }
 
@@ -3085,16 +3458,13 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
       try {
         localStorage.setItem('notepad_content', val);
       } catch(e) {}
-      setCookie('notepad_content', val, 365);
       updateNotepadStats();
     }
 
     function loadNotepadHeight() {
       try {
         const fromLS = localStorage.getItem('notepad_height');
-        const fromCookie = getCookie('notepad_height');
         if (fromLS) return fromLS;
-        if (fromCookie) return fromCookie;
       } catch(e) {}
       return null;
     }
@@ -3104,7 +3474,6 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
       try {
         localStorage.setItem('notepad_height', height);
       } catch(e) {}
-      setCookie('notepad_height', height, 365);
     }
 
     function updateNotepadStats() {
@@ -3200,9 +3569,7 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
     let minimizedWindows = {};
     try {
       const savedLS = localStorage.getItem('minimized_windows');
-      const savedCookie = getCookie('minimized_windows');
-      const saved = savedLS || savedCookie;
-      if (saved) minimizedWindows = JSON.parse(saved);
+      if (savedLS) minimizedWindows = JSON.parse(savedLS);
     } catch(e) {}
 
     function toggleWindowMinimize(windowId) {
@@ -3211,7 +3578,6 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
       try {
         localStorage.setItem('minimized_windows', jsonStr);
       } catch(e) {}
-      setCookie('minimized_windows', jsonStr, 365);
       applyWindowMinimizeState(windowId);
     }
 
@@ -3382,9 +3748,79 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
 
       // Keyboard shortcuts
       document.addEventListener('keydown', (e) => {
+        const targetTag = e.target ? e.target.tagName.toLowerCase() : '';
+        const isEditing = targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select';
+
+        // Esc key closes modals or removes focus
         if (e.key === 'Escape') {
           closeImportModal();
           closeSettingsModal();
+          if (document.activeElement && document.activeElement.blur) {
+            document.activeElement.blur();
+          }
+          return;
+        }
+
+        // Ctrl + Shift + S: Open Settings Modal
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'S' || e.key === 's' || e.key === 'Ы' || e.key === 'ы')) {
+          e.preventDefault();
+          openSettingsModal();
+          return;
+        }
+
+        // Ctrl + Enter: Copy Output Text
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          const copyBtn = document.getElementById('copyBtn');
+          if (copyBtn) copyBtn.click();
+          return;
+        }
+
+        // If typing inside input, textarea, or select, ignore remaining hotkeys
+        if (isEditing) return;
+
+        const activeStreamId = state.activePlayerStreamId === 'all' ? 'main' : state.activePlayerStreamId;
+
+        // Toggle Speed (Key '2' or 'x' / 'ч')
+        if (e.key === '2' || e.key === 'x' || e.key === 'X' || e.key === 'ч' || e.key === 'Ч') {
+          e.preventDefault();
+          toggleStreamSpeed2x(activeStreamId);
+          return;
+        }
+
+        // Shift + M: Add Moment
+        if (e.shiftKey && (e.key === 'M' || e.key === 'm' || e.key === 'Ь' || e.key === 'ь')) {
+          e.preventDefault();
+          addMainMoment('', '');
+          showToast('Добавлен новый момент');
+          return;
+        }
+
+        // Shift + S: Add Start Moment (00:00)
+        if (e.shiftKey && (e.key === 'S' || e.key === 's' || e.key === 'Ы' || e.key === 'ы')) {
+          e.preventDefault();
+          addMainMoment('Пятёрка рассказывает истории', '00:00');
+          showToast('Добавлено начало стрима');
+          return;
+        }
+
+        // Shift + R: Add Reaction Moment
+        if (e.shiftKey && (e.key === 'R' || e.key === 'r' || e.key === 'К' || e.key === 'к')) {
+          e.preventDefault();
+          addMainMoment('Пятёрка смотрит ""', '');
+          showToast('Добавлена реакция');
+          return;
+        }
+
+        // Shift + N: Focus Notepad
+        if (e.shiftKey && (e.key === 'N' || e.key === 'n' || e.key === 'Т' || e.key === 'т')) {
+          e.preventDefault();
+          const notepadEl = document.getElementById('notepadInput');
+          if (notepadEl) {
+            notepadEl.focus();
+            showToast('Фокус на Блокноте');
+          }
+          return;
         }
       });
 
@@ -3435,6 +3871,8 @@ https://youtu.be/jNQXAC9IVRw?t=15m30s
 
     // --- White Pixel Walking Cat Engine ---
     function initWalkingCat() {
+      updateCatVisibility();
+
       const cat = document.getElementById('walkingCat');
       const track = document.getElementById('catTrack');
       if (!cat || !track) return;
